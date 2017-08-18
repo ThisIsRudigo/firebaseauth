@@ -20,8 +20,9 @@ exports.signInWithEmailAndPassword = function(api_key, email, password, cb){
 
 	var options = {
 	    method: 'POST',
-	    uri: endpoints.format(api_key),
-	    body: payload
+	    uri: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + api_key,
+	    body: payload,
+		json: true
 	};
 	 
 	rp(options)

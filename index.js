@@ -1,9 +1,9 @@
-use 'strict'
+//use 'strict'
 
 const utils = require('./utils');
 utils.init();
 
-const firebase = require('/firebase');
+const firebase = require('./firebase');
 
 exports.Firebase = function(firebase_api_key){
 	this.api_key = firebase_api_key;
