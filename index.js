@@ -1,22 +1,16 @@
-//use 'strict'
+'use strict';
 
-const utils = require('./utils');
-utils.init();
+const emailPasswordProvider = require('./providers/email-password-provider');
 
-const firebase = require('./firebase');
+function firebaseAuth(apiKey){
+	if (typeof(apiKey) !== 'string' || apiKey.trim().lenght === 0)
+		throw new Errow('Invalid or missing API Key');
 
-exports.Firebase = function(firebase_api_key){
-	this.api_key = firebase_api_key;
-
-	this.signInWithEmailAndPassword = function(email, password, cb){
-		firebase.signInWithEmailAndPassword(this.api_key, email, password, cb);
-	}
+	this.apiKey = apiKey;
 }
 
-//testing
-firebase.signInWithEmailAndPassword("AIzaSyC-BTUR_lyKcPxhNPgWWuPOPtE2Xeqgggc", "weezysoft@gmail.com", "password", function(err, authData){
-	if (err)
-		console.log(err);
-	else
-		console.log(authData);
-});
+firebaseAuth.prototype.signInWithEmail = function(email, password, callback) {
+	emailPasswordProvider.signIn(this.apiKey, email, password, callback);
+};
+
+module.exports = firebaseAuth;

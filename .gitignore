@@ -1,5 +1,4 @@
-# do not upload config files to github
-config.js
+skip.*
 .idea
 *.ppk
 
