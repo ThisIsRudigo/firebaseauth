@@ -12,6 +12,5 @@ function setupStringFormatExtenstion(){
 	}
 }
 
-exports.init = function(){
-	setupStringFormatExtenstion();
+exports.formatString = function(){
 }
