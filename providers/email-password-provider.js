@@ -4,7 +4,23 @@ const utils = require('../core/utils');
 const endpoints = require('../core/endpoints');
 const validator = require('validator');
 
-exports.register = function(apiKey, email, password, name, callback){
+exports.register = function(apiKey, email, password, name, photoUrl, callback){
+	//search for callback function first
+	if (typeof(name) === 'function'){
+		callback = name
+		name = null;
+	}
+
+	if (photoUrl && typeof(photoUrl) === 'function'){
+		callback = photoUrl
+		photoUrl = null;
+	}
+
+	if (typeof(callback) !== 'function'){
+		callback('No valid callback function defined');
+		return;
+	}
+
 	if (!validator.isEmail(email)){
 		callback(utils.invalidArgumentError('Email'));
 		return;
@@ -15,19 +31,13 @@ exports.register = function(apiKey, email, password, name, callback){
 		return;
 	}
 
-	if (typeof(name) === 'function'){
-		callback = name
-		delete name;
-	}
-
-
-	if (name && !validator.isLength(name, {min: 2})){
-		callback(utils.invalidArgumentError('Name'));
+	if (photoUrl && !validator.isURL(photoUrl)) {
+		callback(utils.invalidArgumentError('Photo Url. Not a valid URL'));
 		return;
 	}
 
-	if (typeof(callback) !== 'function'){
-		callback(utils.invalidArgumentError('Callback'));
+	if (name && !validator.isLength(name, {min: 2})){
+		callback(utils.invalidArgumentError('Name'));
 		return;
 	}
 
@@ -40,18 +50,9 @@ exports.register = function(apiKey, email, password, name, callback){
 
 	endpoints.post(registerEndpoint, payload)
 		.then(function (userInfo) {
-			if (name){
+			if (name || photoUrl){
 				//save name as well before returning to caller
-				payload = {
-					displayName: name,
-					idToken: userInfo.FirebaseToken,
-					returnSecureToken: true
-				}
-				var updateInfoEndpoint = endpoints.getUpdateAccountInfoUrl(apiKey);
-
-				endpoints.post(registerEndpoint, payload, function(){
-					
-				})
+				updateUserProfile(apiKey, name, photoUrl, userInfo.idToken, callback);
 			}
 			else{
 				//no name supplied, return
@@ -59,9 +60,35 @@ exports.register = function(apiKey, email, password, name, callback){
 			}
 	    })
 	    .catch(function (err) {
-			var error = utils.processFirebaseError(err.response.body);
+			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
+}
+
+function updateUserProfile(apiKey, name, photoUrl, idToken, callback){
+	var payload = {
+		idToken: idToken,
+		returnSecureToken: true
+	}
+	if (name)
+		payload.displayName = name;
+
+	if (photoUrl)
+		payload.photoUrl = photoUrl;
+
+	var updateInfoEndpoint = endpoints.getUpdateAccountInfoUrl(apiKey);
+	console.log(updateInfoEndpoint)
+	console.log()
+	console.log(idToken)
+
+	endpoints.post(updateInfoEndpoint, payload)
+		.then(function(updatedUserInfo){
+			callback(null, updatedUserInfo)
+		})
+		.catch(function(err){
+			var error = utils.processFirebaseError(err);
+			callback(error);
+		})
 }
 
 exports.signIn = function(apiKey, email, password, callback){
@@ -76,7 +103,7 @@ exports.signIn = function(apiKey, email, password, callback){
 	}
 
 	if (typeof(callback) !== 'function'){
-		callback(utils.invalidArgumentError('Callback'));
+		callback('No valid callback function defined');
 		return;
 	}
 
@@ -92,7 +119,7 @@ exports.signIn = function(apiKey, email, password, callback){
 			callback(null, userInfo);
 	    })
 	    .catch(function (err) {
-			var error = utils.processFirebaseError(err.response.body);
+			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
 }

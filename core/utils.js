@@ -1,7 +1,7 @@
 'use strict';
 
-
 const firebaseError = require('../core/firebase-error');
+const constants = require('./constants');
 const rp = require('request-promise');
 
 exports.callEndpoint = function(method, url, data, callback){
@@ -11,21 +11,20 @@ exports.callEndpoint = function(method, url, data, callback){
 		options.json = true;
 	}
 	 
-	var promise = rp(options);
-	if (!callback)
-		return promise;
+	if (!callback || typeof(callback) !== 'function')
+		return rp(options);
 
-	promise
+	rp(options)
 		.then(function (successResponse) {
 	        callback(null, successResponse);
 	    })
 	    .catch(function (errorResponse) {
-	        callback(errorResponse.response.body);
+			callback(errorResponse);
 	    });
 }
 
 exports.invalidArgumentError = function(argument) {
-	return new error(constants.errorCodes.INVALID_ARGUMENT_ERROR, "Invalid or missing field: " + argument);
+	return new firebaseError(constants.errorCodes.INVALID_ARGUMENT_ERROR, "Invalid or missing field: " + argument);
 };
 
 exports.processFirebaseError = function(error) {
@@ -35,11 +34,11 @@ exports.processFirebaseError = function(error) {
 	var errorCode = "UNKNOWN_ERROR";
 	var errorMessage = "Some error occurred";
 
-	if (error && error.error){
+	if (error && error.error && error.error.error){
 		//valid error from firebase, check for message
-		errorCode = error.error.message;
+		errorCode = error.error.error.message;
 
-		switch (error.error.message)
+		switch (error.error.error.message)
 		{
 		    //general errors
 		    case "invalid access_token, error code 43.":
@@ -123,6 +122,19 @@ exports.processFirebaseError = function(error) {
 		        errorMessage = "Account has already been linked";
 		        break;
 		}
+	}
+	else if (error.error){
+		//not firebase error!
+
+		if (error.error){
+			switch (error.error.code){
+				//internet error on server or resource not available(?)
+				case "ENOTFOUND":
+					errorCode = "NETWORK";
+					errorMessage = "Remote host is unreachable";
+					break;
+			}
+		}		
 	}
 
 	return new firebaseError(errorCode, errorMessage);
