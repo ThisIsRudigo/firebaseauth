@@ -1,6 +1,7 @@
 'use strict';
 
-const firebaseError = require('../core/firebase-error');
+const firebaseError = require('../models/firebase-error');
+const user = require('../models/firebase-user');
 const constants = require('./constants');
 const rp = require('request-promise');
 
@@ -10,6 +11,8 @@ exports.callEndpoint = function(method, url, data, callback){
 		options.body = data;
 		options.json = true;
 	}
+
+	console.log(url)
 	 
 	if (!callback || typeof(callback) !== 'function')
 		return rp(options);

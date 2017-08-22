@@ -17,7 +17,7 @@ exports.register = function(apiKey, email, password, name, photoUrl, callback){
 	}
 
 	if (typeof(callback) !== 'function'){
-		callback('No valid callback function defined');
+		throw new Error('No valid callback function defined');
 		return;
 	}
 
@@ -56,7 +56,8 @@ exports.register = function(apiKey, email, password, name, photoUrl, callback){
 			}
 			else{
 				//no name supplied, return
-				callback(null, userInfo);
+				var authResult = utils.processFirebaseAuthResult(userInfo);
+				callback(null, authResult);
 			}
 	    })
 	    .catch(function (err) {
@@ -77,13 +78,11 @@ function updateUserProfile(apiKey, name, photoUrl, idToken, callback){
 		payload.photoUrl = photoUrl;
 
 	var updateInfoEndpoint = endpoints.getUpdateAccountInfoUrl(apiKey);
-	console.log(updateInfoEndpoint)
-	console.log()
-	console.log(idToken)
 
 	endpoints.post(updateInfoEndpoint, payload)
 		.then(function(updatedUserInfo){
-			callback(null, updatedUserInfo)
+			var authResult = utils.processFirebaseAuthResult(updatedUserInfo);
+			callback(null, authResult);
 		})
 		.catch(function(err){
 			var error = utils.processFirebaseError(err);
@@ -92,6 +91,11 @@ function updateUserProfile(apiKey, name, photoUrl, idToken, callback){
 }
 
 exports.signIn = function(apiKey, email, password, callback){
+	if (typeof(callback) !== 'function'){
+		throw new Error('No valid callback function defined');
+		return;
+	}
+
 	if (!validator.isEmail(email)){
 		callback(utils.invalidArgumentError('Email'));
 		return;
@@ -99,11 +103,6 @@ exports.signIn = function(apiKey, email, password, callback){
 
 	if (!validator.isLength(password, {min: 6})){
 		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
-		return;
-	}
-
-	if (typeof(callback) !== 'function'){
-		callback('No valid callback function defined');
 		return;
 	}
 
@@ -116,7 +115,8 @@ exports.signIn = function(apiKey, email, password, callback){
 
 	endpoints.post(signInEndpoint, payload)
 		.then(function (userInfo) {
-			callback(null, userInfo);
+			var authResult = utils.processFirebaseAuthResult(userInfo);
+			callback(null, authResult);
 	    })
 	    .catch(function (err) {
 			var error = utils.processFirebaseError(err);
