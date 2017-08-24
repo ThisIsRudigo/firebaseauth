@@ -2,9 +2,10 @@
 
 const emailPasswordProvider = require('./providers/email-password-provider');
 const socialProviders = require('./providers/social-providers');
+const account = require('./user/account');
 
 function firebaseAuth(apiKey){
-	if (typeof(apiKey) !== 'string' || apiKey.trim().lenght === 0)
+	if (typeof(apiKey) !== 'string' || apiKey.trim().length === 0)
 		throw new Errow('Invalid or missing API Key');
 
 	this.apiKey = apiKey;
@@ -12,6 +13,34 @@ function firebaseAuth(apiKey){
 
 firebaseAuth.prototype.signInWithEmail = function(email, password, callback) {
 	emailPasswordProvider.signIn(this.apiKey, email, password, callback);
+};
+
+firebaseAuth.prototype.sendVerificationEmail = function(token, callback) {
+	emailPasswordProvider.sendVerificationEmail(this.apiKey, token, callback);
+};
+
+firebaseAuth.prototype.verifyEmail = function(oobcode, callback) {
+	emailPasswordProvider.verifyEmail(this.apiKey, oobcode, callback);
+};
+
+firebaseAuth.prototype.sendPasswordResetEmail = function(email, callback) {
+	emailPasswordProvider.sendPasswordResetEmail(this.apiKey, email, callback);
+};
+
+firebaseAuth.prototype.resetPassword = function(oobcode, newPassword, callback) {
+	emailPasswordProvider.resetPassword(this.apiKey, oobcode, newPassword, callback);
+};
+
+firebaseAuth.prototype.getProfile = function(token, callback) {
+	account.getProfile(this.apiKey, token, callback);
+};
+
+firebaseAuth.prototype.updateProfile = function(token, callback) {
+	account.updateProfile(this.apiKey, token, name, photoUrl, callback);
+};
+
+firebaseAuth.prototype.refreshToken = function(refreshToken, callback) {
+	account.refreshToken(this.apiKey, refreshToken, callback);
 };
 
 firebaseAuth.prototype.registerWithEmail = function(email, password, name, photoUrl, callback) {
