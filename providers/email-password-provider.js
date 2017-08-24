@@ -181,6 +181,31 @@ exports.sendPasswordResetEmail = function(apiKey, email, callback){
 	    });
 }
 
+// exports.verifyPasswordResetcode = function(apiKey, oobCode, callback){
+// 	if (typeof(callback) !== 'function'){
+// 			throw new Error('No valid callback function defined');
+// 			return;
+// 		}
+
+// 		var payload = {
+// 			oobCode: "oobCode"
+// 		}
+
+		
+// 		var verifyPasswordResetcodeEndpoint = endpoints.getverifyPasswordResetcodeUrl(apiKey);
+
+// 		endpoints.post(verifyPasswordResetcodeEndpoint, payload)
+// 			.then(function (userEmail) {
+// 				var authResult = ({status: "verified! OK" })
+// 				callback(null, authResult);
+// 		    })
+// 		   .catch(function (err) {
+// 				var error = utils.processFirebaseError(err);
+// 				callback(error);
+// 		    });
+
+// }
+
 exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 	if (typeof(callback) !== 'function'){
 			throw new Error('No valid callback function defined');
@@ -204,6 +229,37 @@ exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 				var authResult = ({status: "success" })
 				callback(null, authResult);
 		    })
+		    .catch(function (err) {
+				var error = utils.processFirebaseError(err);
+				callback(error);
+		    });
+
+}
+
+exports.changePassword = function(apiKey, password, token, callback){
+	if (typeof(callback) !== 'function'){
+			throw new Error('No valid callback function defined');
+			return;
+		}
+
+		var payload = {
+			password: password,
+			idToken: token,
+			returnSecureToken: true
+		}
+
+		if (!validator.isLength(password, {min: 6})){
+		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
+		return;
+		}
+
+		var changePasswordEndpoint = endpoints.getchangePasswordUrl(apiKey);
+
+		endpoints.post(changePasswordEndpoint, payload)
+			.then(function (userInfo) {
+			var authResult = utils.processFirebaseAuthResult(userInfo);
+			callback(null, authResult);
+	    	})
 		    .catch(function (err) {
 				var error = utils.processFirebaseError(err);
 				callback(error);
