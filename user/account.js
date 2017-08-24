@@ -3,6 +3,7 @@
 const utils = require('../core/utils');
 const endpoints = require('../core/endpoints');
 const validator = require('validator');
+const user = require('../models/firebase-user');
 
 exports.getProfile = function(apiKey, token, callback){
 	if (typeof(callback) !== 'function'){
@@ -21,9 +22,9 @@ exports.getProfile = function(apiKey, token, callback){
 
 	var accountInfoEndpoint = endpoints.getAccountInfoUrl(apiKey);
 	endpoints.post(accountInfoEndpoint, payload)
-		.then(function(userInfo){
-			var authResult = utils.processFirebaseAuthResult(userInfo);
-			callback(null, authResult);
+		.then(function(result){
+			var users = result.users.map((firebaseUserResult) => new user.user_profile(firebaseUserResult));
+			callback(null, users);
 	   	})
 	    .catch(function(err){
 			var error = utils.processFirebaseError(err);
@@ -69,7 +70,7 @@ exports.updateProfile = function(apiKey, token, name, photoUrl, callback){
 	var updateInfoEndpoint = endpoints.getUpdateAccountInfoUrl(apiKey);
 	endpoints.post(updateInfoEndpoint, payload)
 		.then(function(updatedUserInfo){
-			var authResult = utils.processFirebaseAuthResult(updatedUserInfo);
+			var authResult = new user.user_profile(updatedUserInfo);
 			callback(null, authResult);
 		})
 		.catch(function(err){
@@ -97,20 +98,11 @@ exports.refreshToken = function(apiKey, refreshToken, callback) {
 	var refreshTokenEndpoint = endpoints.getRefreshTokenUrl(apiKey);
 	endpoints.post(refreshTokenEndpoint, payload)
 		.then(function(userInfo){
-			var authResult = utils.processFirebaseRefreshTokenResult(userInfo);
+			var authResult = utils.processBasicFirebaseAuthResult(userInfo);
 			callback(null, authResult);
 		})
 		.catch(function(err){
 			var error = utils.processFirebaseError(err);
 			callback(error);
 		})
-
-				.then(function(userInfo){
-					var authResult = utils.processFirebaseRefreshTokenResult(userInfo);
-					callback(null, authResult);
-		    	})
-			    .catch(function(err){
-					var error = utils.processFirebaseError(err);
-					callback(error);
-			    })
 }

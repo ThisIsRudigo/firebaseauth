@@ -49,7 +49,7 @@ firebaseAuth.prototype.getProfile = function(token, callback) {
 	account.getProfile(this.apiKey, token, callback);
 };
 
-firebaseAuth.prototype.updateProfile = function(token, callback) {
+firebaseAuth.prototype.updateProfile = function(token, name, photoUrl, callback) {
 	account.updateProfile(this.apiKey, token, name, photoUrl, callback);
 };
 
