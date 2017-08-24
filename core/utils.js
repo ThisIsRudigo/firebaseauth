@@ -11,8 +11,6 @@ exports.callEndpoint = function(method, url, data, callback){
 		options.body = data;
 		options.json = true;
 	}
-
-	console.log(url)
 	 
 	if (!callback || typeof(callback) !== 'function')
 		return rp(options);
@@ -30,12 +28,46 @@ exports.invalidArgumentError = function(argument) {
 	return new firebaseError(constants.errorCodes.INVALID_ARGUMENT_ERROR, "Invalid or missing field: " + argument);
 };
 
+exports.processBasicFirebaseAuthResult = basicAuthResult;
+
+exports.processFirebaseAuthResult = function(firebaseAuthResult){
+	// console.log(firebaseAuthResult)
+	var authResult = basicAuthResult(firebaseAuthResult);
+
+	if (firebaseAuthResult.providerId && firebaseAuthResult.providerId.toLowerCase() !== 'password')
+		authResult.user = new user.social_user(firebaseAuthResult);
+	else
+		authResult.user = new user.user(firebaseAuthResult);
+
+	return authResult;
+}
+
+function basicAuthResult(firebaseAuthResult){
+	var now = new Date().getTime();
+	var expiry = (firebaseAuthResult.expiresIn - 60) * 1000; //minus 60 seconds for network lag
+
+	var authResult = {
+		token: firebaseAuthResult.idToken,
+		created: now,
+		expires: now + expiry,
+		refreshToken: firebaseAuthResult.refreshToken
+	}
+
+	return authResult;
+}
+
 exports.processFirebaseError = function(error) {
 	//format for errors from firebase
 	//var errorData = new { error = new { code = 0, message = "errorid" } };
 
 	var errorCode = "UNKNOWN_ERROR";
 	var errorMessage = "Some error occurred";
+	var originalError = error;
+	
+	if (error && error.error && error.error.error)
+		originalError = error.error.error;
+	else if (error && error.error)
+		originalError = error.error;
 
 	if (error && error.error && error.error.error){
 		//valid error from firebase, check for message
@@ -109,9 +141,14 @@ exports.processFirebaseError = function(error) {
 		        errorMessage = "Password recovery type not set";
 		        break;
 
-		    //possible errors from Account Linking
-		    case "INVALID_ID_TOKEN":
-		        errorMessage = "Token is invalid";
+		    //possible errors from Password Recovery
+		    case "MISSING_REQ_TYPE":
+		        errorMessage = "Password recovery type not set";
+		        break;
+
+		    //possible errors from email verification and password reset
+		    case "INVALID_OOB_CODE":
+		        errorMessage = "Code (oobCode) is invalid";
 		        break;
 
 		    //possible errors from Getting Linked Accounts
@@ -132,6 +169,7 @@ exports.processFirebaseError = function(error) {
 		if (error.error){
 			switch (error.error.code){
 				//internet error on server or resource not available(?)
+				case "ENOENT":
 				case "ENOTFOUND":
 					errorCode = "NETWORK";
 					errorMessage = "Remote host is unreachable";
@@ -140,5 +178,5 @@ exports.processFirebaseError = function(error) {
 		}		
 	}
 
-	return new firebaseError(errorCode, errorMessage);
+	return new firebaseError(errorCode, errorMessage, originalError);
 };
