@@ -2,6 +2,7 @@
 .idea
 *.ppk
 *.glue
+firebase.json
 
 .DS_Store
 
