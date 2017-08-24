@@ -164,7 +164,7 @@ firebase.refreshToken(refreshToken, function(err, authData){
 });
 ```
 
-## Refresh Firebase Access Token
+## Protect endpoints with Firebase Access Token and Express
 ```
 var express = require('express');
 var serviceAccount = require("path/to/serviceAccountKey.json");
