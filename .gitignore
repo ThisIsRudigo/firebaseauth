@@ -1,6 +1,7 @@
 *.skip
 .idea
 *.ppk
+*.glue
 
 .DS_Store
 

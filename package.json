@@ -1,5 +1,5 @@
 {
-  "name": "firebase-auth-node",
+  "name": "firebasejs-auth",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
