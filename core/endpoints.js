@@ -12,7 +12,7 @@ var endpoints = {
 	sendPasswordResetEmailUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getOobConfirmationCode?key={0}",
 	resetPasswordUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key={0}",
 	accountInfoUrl:"https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key={0}",
-	refreshTokenUrl: "https://securetoken.googleapis.com/v1/token?key={0}"
+	refreshTokenUrl: "https://securetoken.googleapis.com/v1/token?key={0}",
 	updateAccountInfoUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key={0}",
 	socialIdentityUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyAssertion?key={0}"
 };

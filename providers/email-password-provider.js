@@ -4,6 +4,7 @@ const utils = require('../core/utils');
 const endpoints = require('../core/endpoints');
 const validator = require('validator');
 const account = require('../user/account');
+const user = require('../models/firebase-user');
 
 exports.register = function(apiKey, email, password, name, photoUrl, callback){
 	//search for callback function first
@@ -96,7 +97,7 @@ exports.signIn = function(apiKey, email, password, callback){
 			callback(null, authResult);
 	    })
 	    .catch(function (err) {
-			var err = utils.processFirebaseError(err);
+			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
 }
@@ -104,6 +105,11 @@ exports.signIn = function(apiKey, email, password, callback){
 exports.sendVerificationEmail = function(apiKey, token, callback){
 	if (typeof(callback) !== 'function'){
 		throw new Error('No valid callback function defined');
+		return;
+	}
+
+	if (typeof(token) !== 'string' || token.trim().length === 0){
+		callback(utils.invalidArgumentError('Token'));
 		return;
 	}
 
@@ -115,7 +121,7 @@ exports.sendVerificationEmail = function(apiKey, token, callback){
 
 	endpoints.post(sendVerificationEmailEndpoint, payload)
 		.then(function (userEmail) {
-			var authResult = ({status:"SUCCESS"});
+			var authResult = ({status: "SUCCESS"});
 			callback(null, authResult);
 	    })
 	    .catch(function (err) {
@@ -137,7 +143,7 @@ exports.verifyEmail = function(apiKey, oobCode, callback){
 
 	endpoints.post(verifyEmailEndpoint, payload)
 		.then(function (userInfo) {
-			var authResult = utils.processFirebaseAuthResult(userInfo);
+			var authResult = new user.user(userInfo);
 			callback(null, authResult);
 	    })
 	    .catch(function (err) {
@@ -148,46 +154,47 @@ exports.verifyEmail = function(apiKey, oobCode, callback){
 
 exports.sendPasswordResetEmail = function(apiKey, email, callback){
 	if (typeof(callback) !== 'function'){
+		throw new Error('No valid callback function defined');
+		return;
+	}
+
+	if (!validator.isEmail(email)){
+		callback(utils.invalidArgumentError('Email'));
+		return;
+	}
+
+	var payload = {
+		email: email,
+		requestType: "PASSWORD_RESET"
+	}
+
+	var sendPasswordResetEmailEndpoint = endpoints.getsendPasswordResetEmailUrl(apiKey);
+
+	endpoints.post(sendPasswordResetEmailEndpoint, payload)
+		.then(function (userEmail) {
+			var authResult = ({status: "success" })
+			callback(null, authResult);
+	    })
+	    .catch(function (err) {
+			var error = utils.processFirebaseError(err);
+			callback(error);
+	    });
+}
+
+exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
+	if (typeof(callback) !== 'function'){
 			throw new Error('No valid callback function defined');
 			return;
 		}
 
-		var payload = {
-			email: email,
-			requestType: "PASSWORD_RESET"
-		}
-
-		if (!validator.isEmail(email)){
-		callback(utils.invalidArgumentError('Email'));
-		return;
-		}
-		var sendPasswordResetEmailEndpoint = endpoints.getsendPasswordResetEmailUrl(apiKey);
-
-		endpoints.post(sendPasswordResetEmailEndpoint, payload)
-			.then(function (userEmail) {
-				var authResult = ({status: "success" })
-				callback(null, authResult);
-		    })
-		    .catch(function (err) {
-				err = utils.processFirebaseError(err);
-				callback(error);
-		    });
-
-}
-exports.resetPassword = function(apiKey, oobCode, email, callback){
-	if (typeof(callback) !== 'function'){
-			throw new Error('No valid callback function defined');
+		if (!validator.isLength(newPassword, { min: 6 })) {
+			callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
 			return;
 		}
 
 		var payload = {
 			oobCode: oobCode,
 			newPassword: newPassword
-		}
-
-		if (!validator.isLength(password, {min: 6})){
-		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
-		return;
 		}
 
 		var resetPasswordEndpoint = endpoints.getresetPasswordUrl(apiKey);
@@ -198,7 +205,7 @@ exports.resetPassword = function(apiKey, oobCode, email, callback){
 				callback(null, authResult);
 		    })
 		    .catch(function (err) {
-				var err = utils.processFirebaseError(err);
+				var error = utils.processFirebaseError(err);
 				callback(error);
 		    });
 
