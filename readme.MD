@@ -175,6 +175,103 @@ app.use(firebase.protect(serviceAccount));
 
 //to protect specific endpoints
 app.use('/protected-path', firebase.protect(serviceAccount), function(req, res){
-	res.send('hello world');
+	//req.auth.userId contains firebase user id
+	//req.auth.user contains user profile information
+
+	res.send('hello there. your user id is ' + req.auth.userId);
 })
+
+//register callback to handle jwt decoding response
+//when using callback, remmeber to call next() or respond with an error after processing the information returned to the callback
+
+app.use(firebase.protect(serviceAccount, function(req, res, next, error, data){
+	if (error === 'ERROR_NO_TOKEN'){
+		//token not supplied
+		//handle error case
+	}
+	else if (error === 'ERROR_INVALID_TOKEN'){
+		//token failed verification
+		//handle error case
+	}
+	else if (error){
+		//some other error (this should never happen!) occurred
+		//handle as appropriate
+	}
+	else if (data.error){
+		//there was no error with verifying the token, thus user id can be found in data.userId
+		//there was however an error in getting user info from firebase using the id
+	}
+	else {
+		//data.userId contains firebase user id
+		//data.user contains user profile information
+
+		//do your stuff
+		req.auth = data;
+
+		//REMEMBER TO CALL NEXT WHEN DONE
+		next();
+	}
+}))
+```
+
+# Errors
+
+All authentication errors have the following structure
+```
+{
+    code: any of the error codes below,
+    message: human-readable description of the error,
+    originalError: original response from firebase
+}
+```
+
+## Error Codes
+```
+//general errors
+INVALID_ACCESS_TOKEN
+CREDENTIAL_TOO_OLD_LOGIN_AGAIN
+
+//possible errors from Third Party Authentication
+INVALID_PROVIDER_ID
+MISSING_REQUEST_URI
+MISSING_REQUEST_URI
+INVALID_REQUEST_BODY
+
+//possible errors from Email/Password Account Signup or Signin
+INVALID_EMAIL
+MISSING_PASSWORD
+
+//possible errors from Email/Password Account Signup
+WEAK_PASSWORD
+EMAIL_EXISTS
+
+//possible errors from Email/Password Signin
+INVALID_PASSWORD
+EMAIL_NOT_FOUND
+USER_DISABLED
+
+//possible errors from Email/Password Signin or Password Recovery or Email/Password Sign up
+MISSING_EMAIL
+
+//possible errors from Password Recovery
+MISSING_REQ_TYPE
+
+//possible errors from email verification and password reset
+INVALID_OOB_CODE
+
+//possible errors from Getting Linked Accounts
+INVALID_IDENTIFIER
+MISSING_IDENTIFIER
+FEDERATED_USER_ID_ALREADY_LINKED
+
+//possible errors from Account Delete
+USER_NOT_FOUND
+
+//errors from protect middleware
+ERROR_NO_TOKEN
+ERROR_INVALID_TOKEN
+
+//other errors
+NETWORK_NOT_AVAILABLE
+UNKNOWN_ERROR
 ```

@@ -64,12 +64,9 @@ exports.processFirebaseError = function(error) {
 	var errorMessage = "Some error occurred";
 	var originalError = error;
 	
-	if (error && error.error && error.error.error)
-		originalError = error.error.error;
-	else if (error && error.error)
-		originalError = error.error;
-
 	if (error && error.error && error.error.error){
+		originalError = error.error.error;
+
 		//valid error from firebase, check for message
 		errorCode = error.error.error.message;
 
@@ -77,7 +74,7 @@ exports.processFirebaseError = function(error) {
 		{
 		    //general errors
 		    case "invalid access_token, error code 43.":
-		        errorCode = "InvalidAccessToken";
+		        errorCode = "INVALID_ACCESS_TOKEN";
 		        errorMessage = "Invalid access token";
 		        break;
 
@@ -114,11 +111,6 @@ exports.processFirebaseError = function(error) {
 		    case "EMAIL_EXISTS":
 		        errorMessage = "A user already exists with this email address";
 		        break;
-		        
-		    //possible errors from Account Delete
-		    case "USER_NOT_FOUND":
-		        errorMessage = "User account does not exist";
-		        break;
 
 		    //possible errors from Email/Password Signin
 		    case "INVALID_PASSWORD":
@@ -129,6 +121,11 @@ exports.processFirebaseError = function(error) {
 		        break;
 		    case "USER_DISABLED":
 		        errorMessage = "User account is disabled";
+		        break;
+		        
+		    //possible errors from Account Delete
+		    case "USER_NOT_FOUND":
+		        errorMessage = "User account does not exist";
 		        break;
 
 		    //possible errors from Email/Password Signin or Password Recovery or Email/Password Sign up using setAccountInfo
@@ -164,6 +161,7 @@ exports.processFirebaseError = function(error) {
 		}
 	}
 	else if (error.error){
+		originalError = error.error;
 		//not firebase error!
 
 		if (error.error){
@@ -171,7 +169,7 @@ exports.processFirebaseError = function(error) {
 				//internet error on server or resource not available(?)
 				case "ENOENT":
 				case "ENOTFOUND":
-					errorCode = "NETWORK";
+					errorCode = "NETWORK_NOT_AVAILABLE";
 					errorMessage = "Remote host is unreachable";
 					break;
 			}

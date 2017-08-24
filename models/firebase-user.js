@@ -24,13 +24,16 @@ function user_profile(firebaseUserInfo){
 	this.email = firebaseUserInfo.email;
 	this.emailVerified = firebaseUserInfo.emailVerified;
 	this.displayName = firebaseUserInfo.displayName ? firebaseUserInfo.displayName : '';
-	this.Id = firebaseUserInfo.localId ? firebaseUserInfo.localId : firebaseUserInfo.user_id;
+
+	if (firebaseUserInfo.localId)
+		this.Id = firebaseUserInfo.localId
+	else if (firebaseUserInfo.user_id)
+		this.Id = firebaseUserInfo.user_id;
+	else if (firebaseUserInfo.uid)
+		this.Id = firebaseUserInfo.uid;
+
 	this.photoUrl = firebaseUserInfo.photoUrl;
-	this.passwordUpdatedAt = firebaseUserInfo.passwordUpdatedAt;
-	this.tokenValidSince = firebaseUserInfo.validSince;
 	this.accountDisabled = (firebaseUserInfo.disabled === true);
-	this.lastLoginAt = firebaseUserInfo.lastLoginAt;
-	this.accountCreatedAt = firebaseUserInfo.createdAt;
 	this.profileUrls = firebaseUserInfo.providerUserInfo.map( function(provider) {
 		return { 
 			authenticatedWith: provider.providerId,
