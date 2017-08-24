@@ -96,7 +96,7 @@ exports.signIn = function(apiKey, email, password, callback){
 			callback(null, authResult);
 	    })
 	    .catch(function (err) {
-			var err = utils.processFirebaseError(err);
+			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
 }

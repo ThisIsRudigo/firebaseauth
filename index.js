@@ -11,9 +11,9 @@ function firebaseAuth(apiKey){
 	this.apiKey = apiKey;
 }
 
-firebaseAuth.prototype.protect = function(serviceKeyPath) {
+firebaseAuth.prototype.protect = function(serviceAccount) {
 	var protect = require('./middlewares/protect');
-	protect.init(serviceKeyPath);
+	protect.init(serviceAccount);
 	return protect.requireToken;
 };
 

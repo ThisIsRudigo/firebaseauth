@@ -11,8 +11,7 @@ var _initialized = false;
 // 	});
 // }
 
-exports.init = function(serviceKeyPath) {
-	var serviceAccount = require(serviceKeyPath);
+exports.init = function(serviceAccount) {
 	admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount)
 	});
@@ -32,13 +31,12 @@ exports.requireToken = function(req, res, next) {
 		return;
 	}
 
-	admin.auth().verifyIdToken(idToken)
+	admin.auth().verifyIdToken(token)
 		.then(function(decodedToken) {
 			req.firebaseUserID = decodedToken.uid;
 			next();
 		})
 		.catch(function(error) {
-			console.log(error);
 			res.status(401).json({error: "Unauthorized access"});
 		})
 }
