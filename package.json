@@ -1,14 +1,18 @@
 {
-  "name": "firebase-auth-node",
+  "author": "Rudigo",
+  "name": "Firebase-Auth-Node",
   "version": "1.0.0",
-  "description": "",
+  "description": "Firebase authentication library - a node js wrapper around the Firebase REST API. It can generate Firebase auth token based on given email-password combination or OAuth token (issued by Google, Facebook, Twitter or Github). This Firebase token can then be used with REST queries against Firebase Database endpoints or for protecting resources on a server.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "url": "https://github.com/ThisIsRudigo/Firebase-Auth-Node.git"
+  },
   "license": "ISC",
   "dependencies": {
+    "firebase-admin": "^5.2.1",
     "node-rest-client": "^3.1.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
