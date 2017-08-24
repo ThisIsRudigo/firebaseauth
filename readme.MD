@@ -3,7 +3,7 @@ Firebase Authentication Library
 
 Firebase authentication library - a node js wrapper around the Firebase REST API. It can generate Firebase auth token based on given email-password combination or OAuth token (issued by Google, Facebook, Twitter or Github). This Firebase token can then be used with REST queries against Firebase Database endpoints or for protecting resources/endpoints on a server.
 
-#Usage
+# Usage
 ```
 $ npm install firebasejs-auth
 const FirebaseAuth = require('firebasejs-auth');
