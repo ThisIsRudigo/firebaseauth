@@ -153,6 +153,7 @@ firebase.resetPassword(oobcode, newPassword, function(err, authData){
 		console.log(authData);
 });
 ```
+
 ## Refresh Firebase Access Token
 ```
 firebase.refreshToken(refreshToken, function(err, authData){
@@ -161,4 +162,19 @@ firebase.refreshToken(refreshToken, function(err, authData){
 	else
 		console.log(authData);
 });
+```
+
+## Refresh Firebase Access Token
+```
+var express = require('express');
+var serviceAccount = require("path/to/serviceAccountKey.json");
+var app = express();
+
+//to protect all routes below this point
+app.use(firebase.protect(serviceAccount));
+
+//to protect specific endpoints
+app.use('/protected-path', firebase.protect(serviceAccount), function(req, res){
+	res.send('hello world');
+})
 ```
