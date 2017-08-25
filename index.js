@@ -11,9 +11,9 @@ function firebaseAuth(apiKey){
 	this.apiKey = apiKey;
 }
 
-firebaseAuth.prototype.protect = function(serviceAccount, callback) {
+firebaseAuth.prototype.protect = function(serviceAccount, databaseURL, callback) {
 	var protector = require('./middlewares/protector');
-	return new protector(serviceAccount, callback).requireToken;
+	return protector.instance(serviceAccount, databaseURL, callback);
 };
 
 firebaseAuth.prototype.signInWithEmail = function(email, password, callback) {

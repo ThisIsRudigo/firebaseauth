@@ -1,70 +1,64 @@
 'use strict'
 
 const user = require('../models/firebase-user');
+const validator = require('validator');
 
 const ERROR_NO_TOKEN = "ERROR_NO_TOKEN";
 const ERROR_INVALID_TOKEN = "ERROR_INVALID_TOKEN";
 
-function protector(serviceAccount, callback) {
-	if (!serviceAccount){
-		throw new Error('Please initialize with your firebase service key');
-		return;
-	}
-
-	if (callback && typeof(callback) !== 'function'){
-		throw new Error('Callback is not a function. If you don\'t want to use a callback, remove the second argument from this method call');
-		return;
-	}
-
+function protector(serviceAccount, databaseURL, callback) {
 	this.admin = require("firebase-admin");
 	this.admin.initializeApp({
-	  credential: admin.credential.cert(serviceAccount)
+		credential: this.admin.credential.cert(serviceAccount),
+		databaseURL: databaseURL
 	});
 
 	this.callback = callback;
-}
 
-protector.prototype.requireToken = function(req, res, next) {
-	var token = req.body.token || req.query.token || req.headers['x-access-token'];
+	var p = this;
 
-	if (!token){
-		if (this.noCallbackRegistered(req, res, next, ERROR_NO_TOKEN))
-			res.status(401).json({error: "No token provided"});
+	return function(req, res, next) {
+		var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-		return;
+		if (!token){
+			if (p.noCallbackRegistered(req, res, next, ERROR_NO_TOKEN))
+				res.status(401).json({error: "No token provided"});
+
+			return;
+		}
+
+		p.admin.auth().verifyIdToken(token)
+			.then(function(decodedToken)
+			{
+				var info = {
+					userId: decodedToken.uid
+				}
+
+				p.admin.auth().getUser(info.userId)
+					.then(function(userRecord) {
+						info.user = new user.user_profile(userRecord.toJSON());
+						var shouldProceed = p.noCallbackRegistered(req, res, next, null, info);
+
+						if (shouldProceed){
+							req.auth = info;
+							next();
+						}
+				    })
+				    .catch(function(error) {
+				    	info.error = error;
+				    	var shouldProceed = p.noCallbackRegistered(req, res, next, null, info);
+
+				    	if (shouldProceed){
+				    		//user token passed verification but couldn't get user info
+				    		res.status(401).json({error: "An error occured while trying to verfiy your credentials"});
+				    	}
+				    });
+			})
+			.catch(function(error) {
+				if (p.noCallbackRegistered(req, res, next, ERROR_INVALID_TOKEN))
+					res.status(401).json({error: "Unauthorized access"});
+			})
 	}
-
-	this.admin.auth().verifyIdToken(token)
-		.then(function(decodedToken)
-		{
-			var info = {
-				userId: decodedToken.uid
-			}
-
-			this.admin.auth().getUser(info.userId)
-				.then(function(userRecord) {
-					info.user = new user.user_profile(userRecord.toJSON());
-					var shouldProceed = this.noCallbackRegistered(req, res, next, null, info);
-
-					if (shouldProceed){
-						req.auth = info;
-						next();
-					}
-			    })
-			    .catch(function(error) {
-			    	info.error = error;
-			    	var shouldProceed = this.noCallbackRegistered(req, res, next, null, info);
-
-			    	if (shouldProceed){
-			    		//user token passed verification but couldn't get user info
-			    		res.status(401).json({error: "An error occured while trying to verfiy your credentials"});
-			    	}
-			    });
-		})
-		.catch(function(error) {
-			if (this.noCallbackRegistered(req, res, next, ERROR_INVALID_TOKEN))
-				res.status(401).json({error: "Unauthorized access"});
-		})
 }
 
 protector.prototype.noCallbackRegistered = function(req, res, next, error, data) {
@@ -78,4 +72,21 @@ protector.prototype.noCallbackRegistered = function(req, res, next, error, data)
 	return true;
 };
 
-module.exports = protector;
+exports.instance = function(serviceAccount, databaseURL, callback){
+	if (typeof(serviceAccount) !== 'object' || typeof(serviceAccount.type) !== 'string' || serviceAccount.type !== 'service_account'){
+		throw new Error('Invalid first argument: serviceAccount. Expected a firebase service account credential json object');
+		return;
+	}
+
+	if (!validator.isURL(databaseURL)){
+		throw new Error('Invalid second argument: databaseURL. Expected a URL');
+		return;
+	}
+
+	if (callback && typeof(callback) !== 'function'){
+		throw new Error('Invalid third argument: callback. Expected a function. If you don\'t want to use a callback, remove the second argument from this method call');
+		return;
+	}
+
+	return new protector(serviceAccount, databaseURL, callback);
+}
