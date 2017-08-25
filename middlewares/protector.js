@@ -9,8 +9,7 @@ const ERROR_INVALID_TOKEN = "ERROR_INVALID_TOKEN";
 function protector(serviceAccount, databaseURL, callback) {
 	this.admin = require("firebase-admin");
 	this.admin.initializeApp({
-		credential: this.admin.credential.cert(serviceAccount),
-		databaseURL: databaseURL
+		credential: this.admin.credential.cert(serviceAccount)
 	});
 
 	this.callback = callback;
@@ -36,11 +35,11 @@ function protector(serviceAccount, databaseURL, callback) {
 
 				p.admin.auth().getUser(info.userId)
 					.then(function(userRecord) {
-						info.user = new user.user_profile(userRecord.toJSON());
-						var shouldProceed = p.noCallbackRegistered(req, res, next, null, info);
+						var userInfo = new user.user_profile(userRecord.toJSON());
+						var shouldProceed = p.noCallbackRegistered(req, res, next, null, userInfo);
 
 						if (shouldProceed){
-							req.auth = info;
+							req.user = userInfo;
 							next();
 						}
 				    })

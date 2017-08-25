@@ -174,15 +174,16 @@ firebase.refreshToken(refreshToken, function(err, authData){
 ## Set up resource protector middleware to control access to resouces/endpoints
 ```
 // get service account json and dataaseURL from your firebase project console (Overview -> Settings -> Service Accounts)
+// also check here for more configuration details https://stackoverflow.com/a/40900411
 const serviceAccount = require("path/to/serviceAccountKey.json");
 const databaseURL = "https://test-projects-1273.firebaseio.com";
 
 // initialize default resource protector
-const protector = firebase.protect(serviceAccount, databaseURL);
+const protector = firebase.protect(serviceAccount);
 
 // or initialize resource protector with callback
 // when using callback, remmeber to call next() or respond with an error after processing the information returned to the callback
-const protector = firebase.protect(serviceAccount, databaseURL, function(req, res, next, error, data){
+const protector = firebase.protect(serviceAccount, function(req, res, next, error, data){
 	if (error === 'ERROR_NO_TOKEN'){
 		//token not supplied
 		//handle error case
@@ -200,11 +201,10 @@ const protector = firebase.protect(serviceAccount, databaseURL, function(req, re
 		//there was however an error in getting user info from firebase using the id
 	}
 	else {
-		//data.userId contains firebase user id
-		//data.user contains user profile information
+		//data contains user profile information (email, Id etc)
 
 		//do your stuff
-		req.auth = data;
+		req.user = data;
 
 		//REMEMBER TO CALL NEXT WHEN DONE
 		next();

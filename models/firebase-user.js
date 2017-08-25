@@ -34,12 +34,15 @@ function user_profile(firebaseUserInfo){
 
 	this.photoUrl = firebaseUserInfo.photoUrl;
 	this.accountDisabled = (firebaseUserInfo.disabled === true);
-	this.profileUrls = firebaseUserInfo.providerUserInfo.map( function(provider) {
-		return { 
-			authenticatedWith: provider.providerId,
-			profileUrl: provider.federatedId
-		};
-	});
+	var providers = firebaseUserInfo.providerUserInfo || firebaseUserInfo.providerData;
+	if (providers){
+		this.profileUrls = providers.map( function(provider) {
+			return { 
+				authenticatedWith: provider.providerId,
+				profileUrl: provider.federatedId
+			};
+		});
+	}
 }
 
 exports.user = user;
