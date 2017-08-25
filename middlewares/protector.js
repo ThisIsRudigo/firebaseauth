@@ -6,7 +6,7 @@ const validator = require('validator');
 const ERROR_NO_TOKEN = "ERROR_NO_TOKEN";
 const ERROR_INVALID_TOKEN = "ERROR_INVALID_TOKEN";
 
-function protector(serviceAccount, databaseURL, callback) {
+function protector(serviceAccount, callback) {
 	this.admin = require("firebase-admin");
 	this.admin.initializeApp({
 		credential: this.admin.credential.cert(serviceAccount)
@@ -71,14 +71,9 @@ protector.prototype.noCallbackRegistered = function(req, res, next, error, data)
 	return true;
 };
 
-exports.instance = function(serviceAccount, databaseURL, callback){
+exports.instance = function(serviceAccount, callback){
 	if (typeof(serviceAccount) !== 'object' || typeof(serviceAccount.type) !== 'string' || serviceAccount.type !== 'service_account'){
 		throw new Error('Invalid first argument: serviceAccount. Expected a firebase service account credential json object');
-		return;
-	}
-
-	if (!validator.isURL(databaseURL)){
-		throw new Error('Invalid second argument: databaseURL. Expected a URL');
 		return;
 	}
 
@@ -87,5 +82,5 @@ exports.instance = function(serviceAccount, databaseURL, callback){
 		return;
 	}
 
-	return new protector(serviceAccount, databaseURL, callback);
+	return new protector(serviceAccount, callback);
 }
