@@ -171,27 +171,18 @@ firebase.refreshToken(refreshToken, function(err, authData){
 });
 ```
 
-## Protect endpoints with Firebase Access Token and Express
+## Set up resource protector middleware to control access to resouces/endpoints
 ```
-var express = require('express');
-var serviceAccount = require("path/to/serviceAccountKey.json");
-var app = express();
+// get service account json and dataaseURL from your firebase project console (Overview -> Settings -> Service Accounts)
+const serviceAccount = require("path/to/serviceAccountKey.json");
+const databaseURL = "https://test-projects-1273.firebaseio.com";
 
-//to protect all routes below this point
-app.use(firebase.protect(serviceAccount));
+// initialize default resource protector
+const protector = firebase.protect(serviceAccount, databaseURL);
 
-//to protect specific endpoints
-app.use('/protected-path', firebase.protect(serviceAccount), function(req, res){
-	//req.auth.userId contains firebase user id
-	//req.auth.user contains user profile information
-
-	res.send('hello there. your user id is ' + req.auth.userId);
-})
-
-//register callback to handle jwt decoding response
-//when using callback, remmeber to call next() or respond with an error after processing the information returned to the callback
-
-app.use(firebase.protect(serviceAccount, function(req, res, next, error, data){
+// or initialize resource protector with callback
+// when using callback, remmeber to call next() or respond with an error after processing the information returned to the callback
+const protector = firebase.protect(serviceAccount, databaseURL, function(req, res, next, error, data){
 	if (error === 'ERROR_NO_TOKEN'){
 		//token not supplied
 		//handle error case
@@ -218,7 +209,24 @@ app.use(firebase.protect(serviceAccount, function(req, res, next, error, data){
 		//REMEMBER TO CALL NEXT WHEN DONE
 		next();
 	}
-}))
+});
+```
+
+## Protect endpoints with Firebase Access Token and Express
+```
+var express = require('express');
+var app = express();
+
+// to protect all routes below this point
+app.use(protect);
+
+// to protect specific endpoints
+app.use('/protected-path', protect, function(req, res){
+	//req.auth.userId contains firebase user id
+	//req.auth.user contains user profile information
+
+	res.send('hello there. your user id is ' + req.auth.userId);
+})
 ```
 
 # Errors
