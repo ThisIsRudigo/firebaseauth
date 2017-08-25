@@ -3,7 +3,7 @@
 function user(firebaseAuthResult) {
 	this.email = firebaseAuthResult.email;
 	this.displayName = firebaseAuthResult.displayName;
-	this.Id = firebaseAuthResult.localId ? firebaseAuthResult.localId : firebaseAuthResult.user_id;
+	this.id = firebaseAuthResult.localId ? firebaseAuthResult.localId : firebaseAuthResult.user_id;
 	this.newUser = (firebaseAuthResult.registered === false);
 	this.authenticatedWith = "password";
 }
@@ -12,7 +12,7 @@ function social_user(firebaseAuthResult) {
 	this.email = firebaseAuthResult.email;
 	this.emailVerified = firebaseAuthResult.emailVerified;
 	this.displayName = firebaseAuthResult.displayName;
-	this.Id = firebaseAuthResult.localId ? firebaseAuthResult.localId : firebaseAuthResult.user_id;
+	this.id = firebaseAuthResult.localId ? firebaseAuthResult.localId : firebaseAuthResult.user_id;
 	this.photoUrl = firebaseAuthResult.photoUrl;
 	this.authenticatedWith = firebaseAuthResult.providerId;
 	this.socialProfileUrl = firebaseAuthResult.federatedId;
@@ -26,11 +26,11 @@ function user_profile(firebaseUserInfo){
 	this.displayName = firebaseUserInfo.displayName ? firebaseUserInfo.displayName : '';
 
 	if (firebaseUserInfo.localId)
-		this.Id = firebaseUserInfo.localId
+		this.id = firebaseUserInfo.localId
 	else if (firebaseUserInfo.user_id)
-		this.Id = firebaseUserInfo.user_id;
+		this.id = firebaseUserInfo.user_id;
 	else if (firebaseUserInfo.uid)
-		this.Id = firebaseUserInfo.uid;
+		this.id = firebaseUserInfo.uid;
 
 	this.photoUrl = firebaseUserInfo.photoUrl;
 	this.accountDisabled = (firebaseUserInfo.disabled === true);

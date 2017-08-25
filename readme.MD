@@ -201,7 +201,7 @@ const protector = firebase.protect(serviceAccount, function(req, res, next, erro
 		//there was however an error in getting user info from firebase using the id
 	}
 	else {
-		//data contains user profile information (email, Id etc)
+		//data contains user profile information (email, id etc)
 
 		//do your stuff
 		req.user = data;
@@ -225,7 +225,7 @@ app.use('/protected-path', protect, function(req, res){
 	//req.auth.userId contains firebase user id
 	//req.auth.user contains user profile information
 
-	res.send('hello there. your user id is ' + req.auth.userId);
+	res.send('hello there. your user id is ' + req.user.id);
 })
 ```
 

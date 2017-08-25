@@ -1,7 +1,7 @@
 {
   "author": "Rudigo",
   "name": "firebaseauth",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Firebase authentication library - a node js wrapper around the Firebase REST API. It can generate Firebase auth token based on given email-password combination or OAuth token (issued by Google, Facebook, Twitter or Github). This Firebase token can then be used with REST queries against Firebase Database endpoints or for protecting resources on a server.",
   "main": "index.js",
   "scripts": {
