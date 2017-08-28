@@ -281,7 +281,7 @@ exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 
 }
 
-exports.changePassword = function(apiKey, password, token, callback){
+exports.changePassword = function(apiKey, token, password, callback){
 	if (typeof(callback) !== 'function'){
 			throw new Error('No valid callback function defined');
 			return;
@@ -294,16 +294,15 @@ exports.changePassword = function(apiKey, password, token, callback){
 		}
 
 		if (!validator.isLength(password, {min: 6})){
-		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
-		return;
+			callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
+			return;
 		}
 
 		var changePasswordEndpoint = endpoints.getchangePasswordUrl(apiKey);
-
 		endpoints.post(changePasswordEndpoint, payload)
 			.then(function (userInfo) {
-			var authResult = utils.processFirebaseAuthResult(userInfo);
-			callback(null, authResult);
+				var authResult = utils.processFirebaseAuthResult(userInfo);
+				callback(null, authResult);
 	    	})
 		    .catch(function (err) {
 				var error = utils.processFirebaseError(err);
