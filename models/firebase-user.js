@@ -32,7 +32,7 @@ function user_profile(firebaseUserInfo){
 	else if (firebaseUserInfo.uid)
 		this.id = firebaseUserInfo.uid;
 
-	this.photoUrl = firebaseUserInfo.photoUrl;
+	this.photoUrl = firebaseUserInfo.photoUrl || firebaseUserInfo.photoURL;
 	this.accountDisabled = (firebaseUserInfo.disabled === true);
 	var providers = firebaseUserInfo.providerUserInfo || firebaseUserInfo.providerData;
 	if (providers){

@@ -44,7 +44,7 @@ exports.processFirebaseAuthResult = function(firebaseAuthResult){
 
 function basicAuthResult(firebaseAuthResult){
 	var now = new Date().getTime();
-	var expiry = (firebaseAuthResult.expiresIn - 60) * 1000; //minus 60 seconds for network lag
+	var expiry = (parseInt(firebaseAuthResult.expiresIn) - 60) * 1000; //minus 60 seconds for network lag
 
 	var authResult = {
 		token: firebaseAuthResult.idToken,

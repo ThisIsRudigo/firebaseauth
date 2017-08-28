@@ -32,9 +32,9 @@ firebaseAuth.prototype.sendPasswordResetEmail = function(email, callback) {
 	emailPasswordProvider.sendPasswordResetEmail(this.apiKey, email, callback);
 };
 
-// firebaseAuth.prototype.verifyPasswordResetcode = function(oobcode, callback) {
-// 	emailPasswordProvider.verifyPasswordResetcode(this.apiKey, oobcode, callback);
-// };
+firebaseAuth.prototype.verifyPasswordResetcode = function(oobcode, callback) {
+	emailPasswordProvider.verifyPasswordResetcode(this.apiKey, oobcode, callback);
+};
 
 firebaseAuth.prototype.resetPassword = function(oobcode, newPassword, callback) {
 	emailPasswordProvider.resetPassword(this.apiKey, oobcode, newPassword, callback);
@@ -56,8 +56,8 @@ firebaseAuth.prototype.refreshToken = function(refreshToken, callback) {
 	account.refreshToken(this.apiKey, refreshToken, callback);
 };
 
-firebaseAuth.prototype.registerWithEmail = function(email, password, name, photoUrl, callback) {
-	emailPasswordProvider.register(this.apiKey, email, password, name, photoUrl, callback);
+firebaseAuth.prototype.registerWithEmail = function(email, password, extras, callback) {
+	emailPasswordProvider.register(this.apiKey, email, password, extras, callback);
 };
 
 firebaseAuth.prototype.loginWithProviderID = function(providerToken, providerId, callback) {
