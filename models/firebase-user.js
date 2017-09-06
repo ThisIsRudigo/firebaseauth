@@ -16,7 +16,7 @@ function social_user(firebaseAuthResult) {
 	this.photoUrl = firebaseAuthResult.photoUrl;
 	this.authenticatedWith = firebaseAuthResult.providerId;
 	this.socialProfileUrl = firebaseAuthResult.federatedId;
-	// this.sameCredentialExists = firebaseAuthResult.needConfirmation;
+	this.sameCredentialExists = firebaseAuthResult.needConfirmation;
 	this.rawUserInfo = firebaseAuthResult.rawUserInfo;
 }
 
