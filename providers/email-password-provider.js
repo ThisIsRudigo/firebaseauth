@@ -57,7 +57,7 @@ exports.register = function(apiKey, email, password, extras, callback){
 		return;
 	}
 
-	if (requestVerification && !typeof(requestVerification) !== 'boolean'){
+	if (requestVerification && typeof(requestVerification) !== 'boolean'){
 		callback(utils.invalidArgumentError('requestVerification'));
 		return;
 	}

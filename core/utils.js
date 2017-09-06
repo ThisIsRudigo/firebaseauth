@@ -43,14 +43,13 @@ exports.processFirebaseAuthResult = function(firebaseAuthResult){
 }
 
 function basicAuthResult(firebaseAuthResult){
-	var now = new Date().getTime();
-	var expiry = (parseInt(firebaseAuthResult.expiresIn) - 60) * 1000; //minus 60 seconds for network lag
+	var expiresIn = firebaseAuthResult.expiresIn || firebaseAuthResult.expires_in
+	var expiry = (parseInt(expiresIn) - 60) * 1000; //minus 60 seconds for network lag
 
 	var authResult = {
-		token: firebaseAuthResult.idToken,
-		created: now,
-		expires: now + expiry,
-		refreshToken: firebaseAuthResult.refreshToken
+		token: firebaseAuthResult.idToken || firebaseAuthResult.id_token,
+		expiryMilliseconds: expiry,
+		refreshToken: firebaseAuthResult.refreshToken || firebaseAuthResult.refresh_token
 	}
 
 	return authResult;
@@ -63,6 +62,11 @@ exports.processFirebaseError = function(error) {
 	var errorCode = "UNKNOWN_ERROR";
 	var errorMessage = "Some error occurred";
 	var originalError = error;
+
+	if (error.error && error.error.message === "invalid access_token, error code 43."){
+		errorCode = "INVALID_ACCESS_TOKEN";
+		errorMessage = "Invalid access token";
+	}
 	
 	if (error && error.error && error.error.error){
 		originalError = error.error.error;
@@ -73,11 +77,6 @@ exports.processFirebaseError = function(error) {
 		switch (error.error.error.message)
 		{
 		    //general errors
-		    case "invalid access_token, error code 43.":
-		        errorCode = "INVALID_ACCESS_TOKEN";
-		        errorMessage = "Invalid access token";
-		        break;
-
 		    case "CREDENTIAL_TOO_OLD_LOGIN_AGAIN":
 		        errorMessage = "You need to login again";
 		        break;
@@ -93,6 +92,10 @@ exports.processFirebaseError = function(error) {
 		    case "A system error has occurred - missing or invalid postBody":
 		        errorCode = "INVALID_REQUEST_BODY";
 		        errorMessage = "Missing or invalid postBody";
+		        break;
+		    case "invalid access_token, error code 43.":
+		        errorCode = "INVALID_ACCESS_TOKEN";
+		        errorMessage = "Invalid access token";
 		        break;
 
 		    //possible errors from Email/Password Account Signup (via signupNewUser or setAccountInfo) or Signin
