@@ -43,14 +43,13 @@ exports.processFirebaseAuthResult = function(firebaseAuthResult){
 }
 
 function basicAuthResult(firebaseAuthResult){
-	var now = new Date().getTime();
-	var expiry = (firebaseAuthResult.expiresIn - 60) * 1000; //minus 60 seconds for network lag
+	var expiresIn = firebaseAuthResult.expiresIn || firebaseAuthResult.expires_in
+	var expiry = (parseInt(expiresIn) - 60) * 1000; //minus 60 seconds for network lag
 
 	var authResult = {
-		token: firebaseAuthResult.idToken,
-		created: now,
-		expires: now + expiry,
-		refreshToken: firebaseAuthResult.refreshToken
+		token: firebaseAuthResult.idToken || firebaseAuthResult.id_token,
+		expiryMilliseconds: expiry,
+		refreshToken: firebaseAuthResult.refreshToken || firebaseAuthResult.refresh_token
 	}
 
 	return authResult;
@@ -63,24 +62,21 @@ exports.processFirebaseError = function(error) {
 	var errorCode = "UNKNOWN_ERROR";
 	var errorMessage = "Some error occurred";
 	var originalError = error;
-	
-	if (error && error.error && error.error.error)
-		originalError = error.error.error;
-	else if (error && error.error)
-		originalError = error.error;
 
+	if (error.error && error.error.message === "invalid access_token, error code 43."){
+		errorCode = "INVALID_ACCESS_TOKEN";
+		errorMessage = "Invalid access token";
+	}
+	
 	if (error && error.error && error.error.error){
+		originalError = error.error.error;
+
 		//valid error from firebase, check for message
 		errorCode = error.error.error.message;
 
 		switch (error.error.error.message)
 		{
 		    //general errors
-		    case "invalid access_token, error code 43.":
-		        errorCode = "InvalidAccessToken";
-		        errorMessage = "Invalid access token";
-		        break;
-
 		    case "CREDENTIAL_TOO_OLD_LOGIN_AGAIN":
 		        errorMessage = "You need to login again";
 		        break;
@@ -96,6 +92,10 @@ exports.processFirebaseError = function(error) {
 		    case "A system error has occurred - missing or invalid postBody":
 		        errorCode = "INVALID_REQUEST_BODY";
 		        errorMessage = "Missing or invalid postBody";
+		        break;
+		    case "invalid access_token, error code 43.":
+		        errorCode = "INVALID_ACCESS_TOKEN";
+		        errorMessage = "Invalid access token";
 		        break;
 
 		    //possible errors from Email/Password Account Signup (via signupNewUser or setAccountInfo) or Signin
@@ -114,11 +114,6 @@ exports.processFirebaseError = function(error) {
 		    case "EMAIL_EXISTS":
 		        errorMessage = "A user already exists with this email address";
 		        break;
-		        
-		    //possible errors from Account Delete
-		    case "USER_NOT_FOUND":
-		        errorMessage = "User account does not exist";
-		        break;
 
 		    //possible errors from Email/Password Signin
 		    case "INVALID_PASSWORD":
@@ -129,6 +124,11 @@ exports.processFirebaseError = function(error) {
 		        break;
 		    case "USER_DISABLED":
 		        errorMessage = "User account is disabled";
+		        break;
+		        
+		    //possible errors from Account Delete
+		    case "USER_NOT_FOUND":
+		        errorMessage = "User account does not exist";
 		        break;
 
 		    //possible errors from Email/Password Signin or Password Recovery or Email/Password Sign up using setAccountInfo
@@ -164,6 +164,7 @@ exports.processFirebaseError = function(error) {
 		}
 	}
 	else if (error.error){
+		originalError = error.error;
 		//not firebase error!
 
 		if (error.error){
@@ -171,7 +172,7 @@ exports.processFirebaseError = function(error) {
 				//internet error on server or resource not available(?)
 				case "ENOENT":
 				case "ENOTFOUND":
-					errorCode = "NETWORK";
+					errorCode = "NETWORK_NOT_AVAILABLE";
 					errorMessage = "Remote host is unreachable";
 					break;
 			}

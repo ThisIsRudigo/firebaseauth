@@ -6,16 +6,11 @@ const validator = require('validator');
 const account = require('../user/account');
 const user = require('../models/firebase-user');
 
-exports.register = function(apiKey, email, password, name, photoUrl, callback){
+exports.register = function(apiKey, email, password, extras, callback){
 	//search for callback function first
-	if (typeof(name) === 'function'){
-		callback = name
-		name = null;
-	}
-
-	if (photoUrl && typeof(photoUrl) === 'function'){
-		callback = photoUrl
-		photoUrl = null;
+	if (typeof(extras) === 'function'){
+		callback = extras
+		extras = null;
 	}
 
 	if (typeof(callback) !== 'function'){
@@ -33,6 +28,25 @@ exports.register = function(apiKey, email, password, name, photoUrl, callback){
 		return;
 	}
 
+	var name, photoUrl, requestVerification;
+
+	if (extras){
+		var typeOfExtras = typeof(extras);
+
+		if (typeOfExtras === 'string'){
+			name = extras;
+		}
+		else if (typeOfExtras === 'object'){
+			name = extras.name;
+			photoUrl = extras.photoUrl;
+			requestVerification = extras.requestVerification;
+		}
+		else{
+			callback(utils.invalidArgumentError('Extras. Expected an object, found a ' + typeOfExtras));
+			return;
+		}
+	}
+
 	if (name && !validator.isLength(name, {min: 2})){
 		callback(utils.invalidArgumentError('Name'));
 		return;
@@ -40,6 +54,11 @@ exports.register = function(apiKey, email, password, name, photoUrl, callback){
 
 	if (photoUrl && !validator.isURL(photoUrl)) {
 		callback(utils.invalidArgumentError('Photo Url. Not a valid URL'));
+		return;
+	}
+
+	if (requestVerification && typeof(requestVerification) !== 'boolean'){
+		callback(utils.invalidArgumentError('requestVerification'));
 		return;
 	}
 
@@ -52,20 +71,38 @@ exports.register = function(apiKey, email, password, name, photoUrl, callback){
 
 	endpoints.post(registerEndpoint, payload)
 		.then(function (userInfo) {
-			if (name || photoUrl){
-				//save name as well before returning to caller
-				account.updateProfile(apiKey, userInfo.idToken, name, photoUrl, callback);
+			//get token and other basic auth info
+			var authResult = utils.processFirebaseAuthResult(userInfo);
+
+			//to send verification email?
+			if (requestVerification === true){
+				sendVerificationEmail(apiKey, authResult.token, function(err, result){
+					//disregard result from send verification email
+					completeRegistration(apiKey, name, photoUrl, authResult, callback)
+				})
 			}
 			else{
-				//no name supplied, return
-				var authResult = utils.processFirebaseAuthResult(userInfo);
-				callback(null, authResult);
+				completeRegistration(apiKey, name, photoUrl, authResult, callback)
 			}
 	    })
 	    .catch(function (err) {
 			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
+}
+
+function completeRegistration(apiKey, name, photoUrl, authResult, callback){
+	if (name || photoUrl){
+		//save name as well before returning to caller
+		account.updateProfile(apiKey, authResult.token, name, photoUrl, function(err, user){
+			authResult.user = user;
+			callback(err, authResult); //will return error as well if the profile update failed
+		});
+	}
+	else{
+		//no extra info to update
+		callback(null, authResult);
+	}
 }
 
 exports.signIn = function(apiKey, email, password, callback){
@@ -102,7 +139,8 @@ exports.signIn = function(apiKey, email, password, callback){
 	    });
 }
 
-exports.sendVerificationEmail = function(apiKey, token, callback){
+exports.sendVerificationEmail = sendVerificationEmail;
+function sendVerificationEmail(apiKey, token, callback){
 	if (typeof(callback) !== 'function'){
 		throw new Error('No valid callback function defined');
 		return;
@@ -136,8 +174,13 @@ exports.verifyEmail = function(apiKey, oobCode, callback){
 		return;
 	}
 
+	if (typeof(oobCode) !== 'string'){
+		callback(utils.invalidArgumentError('oobCode'));
+		return;
+	}
+
 	var payload = {
-		oobCode: oobCode,
+		oobCode: oobCode
 	}
 	var verifyEmailEndpoint = endpoints.getverifyEmailUrl(apiKey);
 
@@ -181,62 +224,63 @@ exports.sendPasswordResetEmail = function(apiKey, email, callback){
 	    });
 }
 
-// exports.verifyPasswordResetcode = function(apiKey, oobCode, callback){
-// 	if (typeof(callback) !== 'function'){
-// 			throw new Error('No valid callback function defined');
-// 			return;
-// 		}
+exports.verifyPasswordResetcode = function(apiKey, oobCode, callback){
+	if (typeof(callback) !== 'function'){
+		throw new Error('No valid callback function defined');
+		return;
+	}
 
-// 		var payload = {
-// 			oobCode: "oobCode"
-// 		}
+	if (typeof(oobCode) !== 'string'){
+		callback(utils.invalidArgumentError('oobCode'));
+		return;
+	}
 
-		
-// 		var verifyPasswordResetcodeEndpoint = endpoints.getverifyPasswordResetcodeUrl(apiKey);
-
-// 		endpoints.post(verifyPasswordResetcodeEndpoint, payload)
-// 			.then(function (userEmail) {
-// 				var authResult = ({status: "verified! OK" })
-// 				callback(null, authResult);
-// 		    })
-// 		   .catch(function (err) {
-// 				var error = utils.processFirebaseError(err);
-// 				callback(error);
-// 		    });
-
-// }
+	var payload = {
+		oobCode: oobCode
+	}
+	
+	var verifyPasswordResetcodeEndpoint = endpoints.getverifyPasswordResetcodeUrl(apiKey);
+	endpoints.post(verifyPasswordResetcodeEndpoint, payload)
+		.then(function (userEmail) {
+			var authResult = ({verified: true})
+			callback(null, authResult);
+	    })
+	   .catch(function (err) {
+			var error = utils.processFirebaseError(err);
+			callback(error);
+	    });
+}
 
 exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 	if (typeof(callback) !== 'function'){
-			throw new Error('No valid callback function defined');
-			return;
-		}
+		throw new Error('No valid callback function defined');
+		return;
+	}
 
-		if (!validator.isLength(newPassword, { min: 6 })) {
-			callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
-			return;
-		}
+	if (!validator.isLength(newPassword, { min: 6 })) {
+		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
+		return;
+	}
 
-		var payload = {
-			oobCode: oobCode,
-			newPassword: newPassword
-		};
+	var payload = {
+		oobCode: oobCode,
+		newPassword: newPassword
+	}
 
-		var resetPasswordEndpoint = endpoints.getresetPasswordUrl(apiKey);
+	var resetPasswordEndpoint = endpoints.getresetPasswordUrl(apiKey);
 
-		endpoints.post(resetPasswordEndpoint, payload)
-			.then(function (userEmail) {
-				var authResult = ({status: "success" });
-				callback(null, authResult);
-		    })
-		    .catch(function (err) {
-				var error = utils.processFirebaseError(err);
-				callback(error);
-		    });
-
+	endpoints.post(resetPasswordEndpoint, payload)
+		.then(function (userEmail) {
+			var authResult = ({status: "success" })
+			callback(null, authResult);
+	    })
+	    .catch(function (err) {
+			var error = utils.processFirebaseError(err);
+			callback(error);
+	    });
 };
 
-exports.changePassword = function(apiKey, password, token, callback){
+exports.changePassword = function(apiKey, token, password, callback){
 	if (typeof(callback) !== 'function'){
 			throw new Error('No valid callback function defined');
 			return;
@@ -249,16 +293,15 @@ exports.changePassword = function(apiKey, password, token, callback){
 		};
 
 		if (!validator.isLength(password, {min: 6})){
-		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
-		return;
+			callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
+			return;
 		}
 
 		var changePasswordEndpoint = endpoints.getchangePasswordUrl(apiKey);
-
 		endpoints.post(changePasswordEndpoint, payload)
 			.then(function (userInfo) {
-			var authResult = utils.processFirebaseAuthResult(userInfo);
-			callback(null, authResult);
+				var authResult = utils.processFirebaseAuthResult(userInfo);
+				callback(null, authResult);
 	    	})
 		    .catch(function (err) {
 				var error = utils.processFirebaseError(err);

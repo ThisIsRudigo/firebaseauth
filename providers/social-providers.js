@@ -34,8 +34,7 @@ function loginWithProviderID(apiKey, providerToken, providerId, callback){
 	}
 
 	var payload = {
-		access_token: providerToken,
-		providerId: providerId,
+		postBody: "access_token=" + providerToken + "&providerId=" + providerId,
 		requestUri: "http://localhost",
 		returnSecureToken: true,
 		returnIdpCredential: true
