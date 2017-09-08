@@ -10,7 +10,7 @@ var endpoints = {
 	sendVerificationEmailUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getOobConfirmationCode?key={0}",
 	verifyEmailUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key={0}",
 	sendPasswordResetEmailUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getOobConfirmationCode?key={0}",
-	// verifyPasswordResetcodeUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key={0",
+	verifyPasswordResetcodeUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key={0",
 	resetPasswordUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key={0}",
 	changePasswordUrl: "https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key={0}",
 	accountInfoUrl:"https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key={0}",
@@ -25,7 +25,7 @@ endpoints.getSignUpUrl = (apiKey)  => endpoints.signUpUrl.format(apiKey);
 endpoints.getsendVerificationEmailUrl = (apiKey) => endpoints.sendVerificationEmailUrl.format(apiKey);
 endpoints.getverifyEmailUrl = (apiKey) => endpoints.verifyEmailUrl.format(apiKey);
 endpoints.getsendPasswordResetEmailUrl = (apiKey) => endpoints.sendPasswordResetEmailUrl.format(apiKey);
-// endpoints.getverifyPasswordResetcodeUrl = (apiKey) => endpoints.verifyPasswordResetcodeUrl.format(apiKey);
+endpoints.getverifyPasswordResetcodeUrl = (apiKey) => endpoints.verifyPasswordResetcodeUrl.format(apiKey);
 endpoints.getresetPasswordUrl = (apiKey) => endpoints.resetPasswordUrl.format(apiKey);
 endpoints.getchangePasswordUrl = (apiKey) => endpoints.changePasswordUrl.format(apiKey);
 endpoints.getAccountInfoUrl = (apiKey)  => endpoints.accountInfoUrl.format(apiKey);
