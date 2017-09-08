@@ -220,13 +220,13 @@ exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 		var payload = {
 			oobCode: oobCode,
 			newPassword: newPassword
-		}
+		};
 
 		var resetPasswordEndpoint = endpoints.getresetPasswordUrl(apiKey);
 
 		endpoints.post(resetPasswordEndpoint, payload)
 			.then(function (userEmail) {
-				var authResult = ({status: "success" })
+				var authResult = ({status: "success" });
 				callback(null, authResult);
 		    })
 		    .catch(function (err) {
@@ -234,7 +234,7 @@ exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 				callback(error);
 		    });
 
-}
+};
 
 exports.changePassword = function(apiKey, password, token, callback){
 	if (typeof(callback) !== 'function'){
@@ -246,7 +246,7 @@ exports.changePassword = function(apiKey, password, token, callback){
 			password: password,
 			idToken: token,
 			returnSecureToken: true
-		}
+		};
 
 		if (!validator.isLength(password, {min: 6})){
 		callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));

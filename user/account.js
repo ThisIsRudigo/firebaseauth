@@ -30,7 +30,7 @@ exports.getProfile = function(apiKey, token, callback){
 			var error = utils.processFirebaseError(err);
 			callback(error);
 		})
-}
+};
 
 exports.updateProfile = function(apiKey, token, name, photoUrl, callback){
 	if (photoUrl && typeof(photoUrl) === 'function'){
@@ -99,6 +99,33 @@ exports.refreshToken = function(apiKey, refreshToken, callback) {
 	endpoints.post(refreshTokenEndpoint, payload)
 		.then(function(userInfo){
 			var authResult = utils.processBasicFirebaseAuthResult(userInfo);
+			callback(null, authResult);
+		})
+		.catch(function(err){
+			var error = utils.processFirebaseError(err);
+			callback(error);
+		})
+}
+
+exports.deleteAccount = function(apiKey, token, callback) {
+	if (typeof(callback) !== 'function'){
+		throw new Error('No valid callback function defined');
+		return;
+	}
+
+	if (typeof(token) !== 'string' || token.trim().length === 0){
+		callback(utils.invalidArgumentError('Token'));
+		return;
+	}
+
+	var payload = {
+		idToken: token,
+	}
+
+	var deleteAccountEndpoint = endpoints.getDeleteAccountUrl(apiKey);
+	endpoints.post(deleteAccountEndpoint, payload)
+		.then(function(userInfo){
+			var authResult = ({status: "SUCCESS"});
 			callback(null, authResult);
 		})
 		.catch(function(err){
