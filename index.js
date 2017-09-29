@@ -3,6 +3,8 @@
 const emailPasswordProvider = require('./providers/email-password-provider');
 const socialProviders = require('./providers/social-providers');
 const account = require('./user/account');
+const instagram = require('./providers/insta_redirect');
+
 
 function firebaseAuth(apiKey){
 	if (typeof(apiKey) !== 'string' || apiKey.trim().length === 0)
@@ -82,6 +84,10 @@ firebaseAuth.prototype.loginWithGithub = function(providerToken, callback) {
 
 firebaseAuth.prototype.loginWithTwitter = function(providerToken, callback) {
 	socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
+};
+
+firebaseAuth.prototype.handleRedirect = function(req, res){
+	instagram.handleRedirect(req, res);
 };
 
 module.exports = firebaseAuth;

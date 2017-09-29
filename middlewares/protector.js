@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const user = require('../models/firebase-user');
 const validator = require('validator');
