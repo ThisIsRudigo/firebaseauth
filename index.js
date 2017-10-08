@@ -3,6 +3,8 @@
 const emailPasswordProvider = require('./providers/email-password-provider');
 const socialProviders = require('./providers/social-providers');
 const account = require('./user/account');
+const instagram = require('./providers/insta_redirect');
+
 
 function firebaseAuth(apiKey){
 	if (typeof(apiKey) !== 'string' || apiKey.trim().length === 0)
@@ -56,8 +58,12 @@ firebaseAuth.prototype.refreshToken = function(refreshToken, callback) {
 	account.refreshToken(this.apiKey, refreshToken, callback);
 };
 
-firebaseAuth.prototype.registerWithEmail = function(email, password, extras, callback) {
-	emailPasswordProvider.register(this.apiKey, email, password, extras, callback);
+firebaseAuth.prototype.deleteAccount = function(token, callback) {
+	account.deleteAccount(this.apiKey, token, callback);
+};
+
+firebaseAuth.prototype.registerWithEmail = function(email, password, name, photoUrl, callback) {
+	emailPasswordProvider.register(this.apiKey, email, password, name, photoUrl, callback);
 };
 
 firebaseAuth.prototype.loginWithProviderID = function(providerToken, providerId, callback) {
@@ -78,6 +84,10 @@ firebaseAuth.prototype.loginWithGithub = function(providerToken, callback) {
 
 firebaseAuth.prototype.loginWithTwitter = function(providerToken, callback) {
 	socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
+};
+
+firebaseAuth.prototype.processInstagramAuthCode = function(serviceAccount, instagramAuthCode, redirectUri, callback){
+	instagram.processInstagramAuthCode(serviceAccount, instagramAuthCode, redirectUri, callback);
 };
 
 module.exports = firebaseAuth;

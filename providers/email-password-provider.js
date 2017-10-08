@@ -278,8 +278,7 @@ exports.resetPassword = function(apiKey, oobCode, newPassword, callback){
 			var error = utils.processFirebaseError(err);
 			callback(error);
 	    });
-
-}
+};
 
 exports.changePassword = function(apiKey, token, password, callback){
 	if (typeof(callback) !== 'function'){
@@ -291,7 +290,7 @@ exports.changePassword = function(apiKey, token, password, callback){
 			password: password,
 			idToken: token,
 			returnSecureToken: true
-		}
+		};
 
 		if (!validator.isLength(password, {min: 6})){
 			callback(utils.invalidArgumentError('Password. Password must be at least 6 characters'));
