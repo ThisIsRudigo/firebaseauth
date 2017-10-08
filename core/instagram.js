@@ -5,15 +5,13 @@
  * @returns {Promise<string>} The Firebase custom auth token in a promise.
  */
 
-var admin;
-exports.init = function (serviceAccount) {
   var admin = require("firebase-admin");
-  admin.initializeApp({
+  exports.init = function (serviceAccount) {
+    admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://' + serviceAccount.project_id + '.firebaseio.com'
   });
 };
-// Firebase Setup
 
 exports.logInstagramUserIntoFirebase = function(instagramID, displayName, photoURL, callback) {
   if (!admin){
@@ -23,18 +21,24 @@ exports.logInstagramUserIntoFirebase = function(instagramID, displayName, photoU
 
   // The UID we'll assign to the user.
   const uid = 'instagram:' + instagramID;
+  console.log('this is the user uid: ', uid)
 
   // Create or update the user account.
   var userInfo = {
     displayName: displayName,
     photoURL: photoURL
   };
+  console.log('this is the user info: ', userInfo)
 
   updateFirebaseUserOrCreateNewUser(uid, userInfo, function(err){
-    if (err)
-      callback(err);
+    if (err){
+    console.log('this is the UPDATE ERROR: ', err)
+    callback(err);
+    return;
+    }
     else{
       const token = admin.auth().createCustomToken(uid);
+      console.log('this is the your TOKEN: ', token)
       callback(token);
     }
   });
@@ -65,3 +69,18 @@ function createFirebaseUser(uid, userInfo, callback){
       callback(error);
     })
 }
+
+// function createCustomToken(uid, callback){
+//     uid = uid;
+//     admin.auth().createCustomToken(uid)
+//        .then(function(token){
+//           console.log('this is the your TOKEN: ', token)
+//           callback(token);
+//         })
+//         .catch(function(error){
+//                       console.log('this is the user error: ', error)
+
+//           callback(error);
+//         })
+// }
+// }

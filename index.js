@@ -86,8 +86,8 @@ firebaseAuth.prototype.loginWithTwitter = function(providerToken, callback) {
 	socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
 };
 
-firebaseAuth.prototype.handleRedirect = function(req, res){
-	instagram.handleRedirect(req, res);
+firebaseAuth.prototype.processInstagramAuthCode = function(serviceAccount, instagramAuthCode, redirectUri, callback){
+	instagram.processInstagramAuthCode(serviceAccount, instagramAuthCode, redirectUri, callback);
 };
 
 module.exports = firebaseAuth;

@@ -14,10 +14,10 @@ const insta = require('../core/instagram');
 //   }
 // };
 
-var oauth2;
-exports.init = function (credentials) {
-    oauth2 = require('simple-oauth2').create(credentials);
-};
+// var oauth2;
+// exports.init = function (credentials) {
+//     oauth2 = require('simple-oauth2').create(credentials);
+// };
 
 // const OAUTH_REDIRECT_PATH = '/redirect';
 // const OAUTH_CALLBACK_PATH = '/instagram-callback';
@@ -34,25 +34,30 @@ exports.init = function (credentials) {
  * Exchanges a given Instagram auth code passed in the 'code' URL query parameter for a Firebase auth token.
  */
  //d6ae06a0ee134e9ea7c485c449e8d157
-exports.processInstagramAuthCode = function(serviceAccount, instagramAuthCode, redirectUri, callback){
+exports.processInstagramAuthCode = function(credentials, serviceAccount, instagramAuthCode, redirectUri, callback) {
+    const oauth2 = require('simple-oauth2').create(credentials);
 
-  const oauthParams = {
-    code: instagramAuthCode,
-    redirect_uri: redirectUri
-  };
+    const oauthParams = {
+        code: instagramAuthCode,
+        redirect_uri: redirectUri
+    };
 
-  oauth2.authorizationCode.getToken(oauthParams)
-    .then(function (results) {
-      console.log('Auth code exchange result received:', results);
-      // We have an Instagram access token and the user identity now.
-      const instagramUserID = results.user.id;
-      const profilePic = results.user.profile_picture;
-      const userName = results.user.full_name;
 
-      // Create a Firebase account and get the Custom Auth Token.
-      insta.init(serviceAccount);
-      insta.logInstagramUserIntoFirebase(instagramUserID, userName, profilePic, callback);
-    });
+    oauth2.authorizationCode.getToken(oauthParams)
+        .then(function (results) {
+            console.log('Auth code exchange result received:', results);
+            // We have an Instagram access token and the user identity now.
+            const instagramUserID = results.user.id;
+            const profilePic = results.user.profile_picture;
+            const userName = results.user.full_name;
+
+            // Create a Firebase account and get the Custom Auth Token.
+            insta.init(serviceAccount);
+            insta.logInstagramUserIntoFirebase(instagramUserID, userName, profilePic, callback);
+        })
+        .catch(function (error) {
+            console.log('Auth code exchange error received:', error);
+        });
 };
 
 /**

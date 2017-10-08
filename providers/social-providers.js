@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const utils = require('../core/utils');
 const endpoints = require('../core/endpoints');
@@ -8,7 +8,7 @@ const ids = {
 	Google: "google.com",
 	Github: "github.com",
 	Twitter: "twitter.com"
-}
+};
 
 function loginWithProviderID(apiKey, providerToken, providerId, callback){
 	if (typeof(callback) !== 'function'){
@@ -38,7 +38,7 @@ function loginWithProviderID(apiKey, providerToken, providerId, callback){
 		requestUri: "http://localhost",
 		returnSecureToken: true,
 		returnIdpCredential: true
-	}
+	};
 	var signInEndpoint = endpoints.getSocialIdentityUrl(apiKey);
 
 	endpoints.post(signInEndpoint, payload)
@@ -59,16 +59,16 @@ exports.loginWithProviderID = loginWithProviderID;
 
 exports.loginWithFacebook = function (apiKey, providerToken, callback){
 	loginWithProviderID(apiKey, providerToken, ids.Facebook, callback)
-}
+};
 
 exports.loginWithGoogle = function (apiKey, providerToken, callback){
 	loginWithProviderID(apiKey, providerToken, ids.Google, callback)
-}
+};
 
 exports.loginWithGithub = function (apiKey, providerToken, callback){
 	loginWithProviderID(apiKey, providerToken, ids.Github, callback)
-}
+};
 
 exports.loginWithTwitter = function (apiKey, providerToken, callback){
 	loginWithProviderID(apiKey, providerToken, ids.Twitter, callback)
-}
+};
