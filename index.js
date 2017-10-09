@@ -3,6 +3,8 @@
 const emailPasswordProvider = require('./providers/email-password-provider');
 const socialProviders = require('./providers/social-providers');
 const account = require('./user/account');
+const instagram = require('./providers/insta_redirect');
+
 
 function firebaseAuth(apiKey){
 	if (typeof(apiKey) !== 'string' || apiKey.trim().length === 0)
@@ -11,10 +13,9 @@ function firebaseAuth(apiKey){
 	this.apiKey = apiKey;
 }
 
-firebaseAuth.prototype.protect = function(serviceAccount) {
-	var protect = require('./middlewares/protect');
-	protect.init(serviceAccount);
-	return protect.requireToken;
+firebaseAuth.prototype.protect = function(serviceAccount, callback) {
+	var protector = require('./middlewares/protector');
+	return protector.instance(serviceAccount, callback);
 };
 
 firebaseAuth.prototype.signInWithEmail = function(email, password, callback) {
@@ -33,9 +34,9 @@ firebaseAuth.prototype.sendPasswordResetEmail = function(email, callback) {
 	emailPasswordProvider.sendPasswordResetEmail(this.apiKey, email, callback);
 };
 
-// firebaseAuth.prototype.verifyPasswordResetcode = function(oobcode, callback) {
-// 	emailPasswordProvider.verifyPasswordResetcode(this.apiKey, oobcode, callback);
-// };
+firebaseAuth.prototype.verifyPasswordResetcode = function(oobcode, callback) {
+	emailPasswordProvider.verifyPasswordResetcode(this.apiKey, oobcode, callback);
+};
 
 firebaseAuth.prototype.resetPassword = function(oobcode, newPassword, callback) {
 	emailPasswordProvider.resetPassword(this.apiKey, oobcode, newPassword, callback);
@@ -55,6 +56,10 @@ firebaseAuth.prototype.updateProfile = function(token, name, photoUrl, callback)
 
 firebaseAuth.prototype.refreshToken = function(refreshToken, callback) {
 	account.refreshToken(this.apiKey, refreshToken, callback);
+};
+
+firebaseAuth.prototype.deleteAccount = function(token, callback) {
+	account.deleteAccount(this.apiKey, token, callback);
 };
 
 firebaseAuth.prototype.registerWithEmail = function(email, password, name, photoUrl, callback) {
@@ -79,6 +84,10 @@ firebaseAuth.prototype.loginWithGithub = function(providerToken, callback) {
 
 firebaseAuth.prototype.loginWithTwitter = function(providerToken, callback) {
 	socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
+};
+
+firebaseAuth.prototype.processInstagramAuthCode = function(serviceAccount, instagramAuthCode, redirectUri, callback){
+	instagram.processInstagramAuthCode(serviceAccount, instagramAuthCode, redirectUri, callback);
 };
 
 module.exports = firebaseAuth;

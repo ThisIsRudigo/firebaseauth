@@ -3,6 +3,7 @@
 *.ppk
 *.glue
 firebase.json
+config.js
 
 .DS_Store
 
