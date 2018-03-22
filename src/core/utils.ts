@@ -1,13 +1,15 @@
-'use strict';
+import FirebaseError from "../models/firebase-error";
+import constants from "./constants";
+const rp = require("request-promise");
+import { SocialUser, User } from "../models/firebase-user";
 
-const firebaseError = require('../models/firebase-error');
-const user = require('../models/firebase-user');
-const constants = require('./constants');
-const rp = require('request-promise');
+export function callEndpoint(method: string, url: string, data?: any, callback?: any){
+	const options: any = {
+		method: method,
+		uri:url
+	};
 
-exports.callEndpoint = function(method, url, data, callback){
-	var options = { method: method, uri:url }
-	if (data && method.toLowerCase().trim() == 'post'){
+	if (data && method.toLowerCase().trim() === 'post'){
 		options.body = data;
 		options.json = true;
 	}
@@ -15,53 +17,43 @@ exports.callEndpoint = function(method, url, data, callback){
 	if (!callback || typeof(callback) !== 'function')
 		return rp(options);
 
-	rp(options)
-		.then(function (successResponse) {
-	        callback(null, successResponse);
-	    })
-	    .catch(function (errorResponse) {
-			callback(errorResponse);
-	    });
+	rp(options).then((data: any) => callback(null, data))
+        .catch((error: any) => callback(error));
 }
 
-exports.invalidArgumentError = function(argument) {
-	return new firebaseError(constants.errorCodes.INVALID_ARGUMENT_ERROR, "Invalid or missing field: " + argument);
-};
+export function invalidArgumentError(argument: string) {
+	return new FirebaseError(constants.errorCodes.INVALID_ARGUMENT_ERROR, `Invalid or missing field: ${argument}`);
+}
 
-exports.processBasicFirebaseAuthResult = basicAuthResult;
-
-exports.processFirebaseAuthResult = function(firebaseAuthResult){
-	// console.log(firebaseAuthResult)
-	var authResult = basicAuthResult(firebaseAuthResult);
+export function processFirebaseAuthResult(firebaseAuthResult: any) {
+	const authResult: any = processBasicFirebaseAuthResult(firebaseAuthResult);
 
 	if (firebaseAuthResult.providerId && firebaseAuthResult.providerId.toLowerCase() !== 'password')
-		authResult.user = new user.social_user(firebaseAuthResult);
+		authResult.user = new SocialUser(firebaseAuthResult);
 	else
-		authResult.user = new user.user(firebaseAuthResult);
+		authResult.user = new User(firebaseAuthResult);
 
 	return authResult;
 }
 
-function basicAuthResult(firebaseAuthResult){
-	var expiresIn = firebaseAuthResult.expiresIn || firebaseAuthResult.expires_in
-	var expiry = (parseInt(expiresIn) - 60) * 1000; //minus 60 seconds for network lag
+export function processBasicFirebaseAuthResult(firebaseAuthResult: any) {
+	const expiresIn = firebaseAuthResult.expiresIn || firebaseAuthResult.expires_in;
+    const expiry = (parseInt(expiresIn) - 60) * 1000; //minus 60 seconds for network lag
 
-	var authResult = {
-		token: firebaseAuthResult.idToken || firebaseAuthResult.id_token,
-		expiryMilliseconds: expiry,
-		refreshToken: firebaseAuthResult.refreshToken || firebaseAuthResult.refresh_token
-	}
-
-	return authResult;
+    return {
+        token: firebaseAuthResult.idToken || firebaseAuthResult.id_token,
+        expiryMilliseconds: expiry,
+        refreshToken: firebaseAuthResult.refreshToken || firebaseAuthResult.refresh_token
+    };
 }
 
-exports.processFirebaseError = function(error) {
+export function processFirebaseError(error: any) {
 	//format for errors from firebase
 	//var errorData = new { error = new { code = 0, message = "errorid" } };
 
-	var errorCode = "UNKNOWN_ERROR";
-	var errorMessage = "Some error occurred";
-	var originalError = error;
+	let errorCode = "UNKNOWN_ERROR",
+        errorMessage = "Some error occurred",
+        originalError = error;
 
 	if (error.error && error.error.message === "invalid access_token, error code 43."){
 		errorCode = "INVALID_ACCESS_TOKEN";
@@ -141,11 +133,6 @@ exports.processFirebaseError = function(error) {
 		        errorMessage = "Password recovery type not set";
 		        break;
 
-		    //possible errors from Password Recovery
-		    case "MISSING_REQ_TYPE":
-		        errorMessage = "Password recovery type not set";
-		        break;
-
 		    //possible errors from email verification and password reset
 		    case "INVALID_OOB_CODE":
 		        errorMessage = "Code (oobCode) is invalid";
@@ -156,7 +143,7 @@ exports.processFirebaseError = function(error) {
 		        errorMessage = "Unknown or invalid identifier";
 		        break;
 		    case "MISSING_IDENTIFIER":
-		        errorMessage = "Indentifier not provided";
+		        errorMessage = "Identifier not provided";
 		        break;
 		    case "FEDERATED_USER_ID_ALREADY_LINKED":
 		        errorMessage = "Account has already been linked";
@@ -179,5 +166,5 @@ exports.processFirebaseError = function(error) {
 		}		
 	}
 
-	return new firebaseError(errorCode, errorMessage, originalError);
-};
+	return new FirebaseError(errorCode, errorMessage, originalError);
+}
