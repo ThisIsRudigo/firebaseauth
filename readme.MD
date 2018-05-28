@@ -244,7 +244,8 @@ Setup default token middleware with following behaviour
 - If token is properly decoded, full user info (token, id, displayName, email etc) is returned in `req.user` (v0.1.1 and earlier)
 
 ```
-const firebaseTokenMiddleware = FirebaseAuth.defaultTokenMiddleware(serviceAccount); // v0.2.0 and later
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount); // v0.9.9 and later
+const firebaseTokenMiddleware = FirebaseAuth.defaultTokenMiddleware(serviceAccount); // v0.2.0 to 0.9.8
 const firebaseTokenMiddleware = firebase.protect(serviceAccount); // v0.1.1 and earlier
 ```
 
@@ -277,7 +278,8 @@ const middlewareCallback = function(req, res, next, error, data) {
         next();
     }
 };
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, middlewareCallback); // v0.2.0 and later
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, middlewareCallback); // v0.9.9 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, middlewareCallback); // v0.2.0 to 0.9.8
 const firebaseTokenMiddleware = firebase.protect(serviceAccount, middlewareCallback); // v0.1.1 and earlier
 ```
 
@@ -291,10 +293,12 @@ const options = {
     tokenField: "access_token",
     userIdOnly: false
 };
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options);
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options); // v0.9.9 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options); // v0.2.0 to 0.9.8
 
 // use with callback
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options, middlewareCallback); 
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options, middlewareCallback); // v0.9.9 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options, middlewareCallback); // v0.2.0 to 0.9.8
 ```
 
 ### Step 3 - Protect endpoints with Firebase Access Token and Express
