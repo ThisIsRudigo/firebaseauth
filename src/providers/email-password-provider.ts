@@ -2,7 +2,7 @@ import * as utils from "../core/utils";
 import Endpoints from "../core/endpoints";
 import * as validator from "validator";
 import { updateProfile } from "../user/account";
-import { User } from "../models/firebase-user";
+import { FirebaseUser } from "../models/firebase-user";
 
 export function register(apiKey: string, email: string, password: string, ...more: any[]) {
     let extras: any, callback: Function;
@@ -69,7 +69,7 @@ export function register(apiKey: string, email: string, password: string, ...mor
 		password: password,
 		returnSecureToken: true
 	};
-	const registerEndpoint = new Endpoints(apiKey).urls.signUpUrl;
+	const registerEndpoint = Endpoints.urls(apiKey).signUpUrl;
 
 	Endpoints.post(registerEndpoint, payload)
 		.then((userInfo: any) => {
@@ -119,7 +119,7 @@ export function signIn(apiKey: string, email: string, password: string, callback
 		returnSecureToken: true
 	};
 
-	Endpoints.post(new Endpoints(apiKey).urls.signInUrl, payload)
+	Endpoints.post(Endpoints.urls(apiKey).signInUrl, payload)
 		.then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
 	    .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
@@ -135,7 +135,7 @@ export function sendVerificationEmail(apiKey: string, token: string, callback: F
 		requestType: "VERIFY_EMAIL"
 	};
 
-	Endpoints.post(new Endpoints(apiKey).urls.sendVerificationEmailUrl, payload)
+	Endpoints.post(Endpoints.urls(apiKey).sendVerificationEmailUrl, payload)
 		.then(() => callback(null, { status: "success" }))
 	    .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
@@ -143,8 +143,8 @@ export function sendVerificationEmail(apiKey: string, token: string, callback: F
 export function verifyEmail(apiKey: string, oobCode: string, callback: Function) {
 	const payload = { oobCode: oobCode };
 
-	Endpoints.post(new Endpoints(apiKey).urls.verifyEmailUrl, payload)
-		.then((userInfo: any) => callback(null, new User(userInfo)))
+	Endpoints.post(Endpoints.urls(apiKey).verifyEmailUrl, payload)
+		.then((userInfo: any) => callback(null, new FirebaseUser(userInfo)))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
 
@@ -159,7 +159,7 @@ export function sendPasswordResetEmail(apiKey: string, email: string, callback: 
 		requestType: "PASSWORD_RESET"
 	};
 
-	Endpoints.post(new Endpoints(apiKey).urls.sendPasswordResetEmailUrl, payload)
+	Endpoints.post(Endpoints.urls(apiKey).sendPasswordResetEmailUrl, payload)
         .then(() => callback(null, { status: "success" }))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
@@ -170,7 +170,7 @@ export function verifyPasswordResetCode(apiKey: string, oobCode: string, callbac
 		return;
 	}
 
-	Endpoints.post(new Endpoints(apiKey).urls.verifyPasswordResetcodeUrl, { oobCode: oobCode })
+	Endpoints.post(Endpoints.urls(apiKey).verifyPasswordResetcodeUrl, { oobCode: oobCode })
         .then(() => callback(null, { verified: true }))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
@@ -186,7 +186,7 @@ export function resetPassword(apiKey: string, oobCode: string, newPassword: stri
 		newPassword: newPassword
 	};
 
-	Endpoints.post(new Endpoints(apiKey).urls.resetPasswordUrl, payload)
+	Endpoints.post(Endpoints.urls(apiKey).resetPasswordUrl, payload)
         .then(() => callback(null, { status: "success" }))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 
@@ -204,7 +204,7 @@ export function changePassword(apiKey: string, token: string, password: string, 
         return;
     }
 
-    Endpoints.post(new Endpoints(apiKey).urls.changePasswordUrl, payload)
+    Endpoints.post(Endpoints.urls(apiKey).changePasswordUrl, payload)
         .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 

@@ -1,14 +1,25 @@
+/// <reference path="./types/express.d.ts" />
+
 import * as emailPasswordProvider from "./providers/email-password-provider";
 import * as socialProviders from "./providers/social-providers";
 import * as account from "./user/account";
+import { Callback } from "./types";
+import { Guard, GuardCallback, GuardOptions } from "./middlewares/guard";
+import { RequestHandler } from "express";
 
-export type Callback = (error: any, result: any) => void;
-
-export default class FirebaseAuth {
+class FirebaseAuth {
     private apiKey: string;
 
     constructor(apiKey: string) {
         this.apiKey = apiKey;
+    }
+
+    static initTokenMiddleware(serviceAccount: any): RequestHandler;
+    static initTokenMiddleware(serviceAccount: any, options: GuardOptions): RequestHandler;
+    static initTokenMiddleware(serviceAccount: any, callback: GuardCallback): RequestHandler;
+    static initTokenMiddleware(serviceAccount: any, options: GuardOptions, callback: GuardCallback): RequestHandler;
+    static initTokenMiddleware(serviceAccount: any, optionsOrCallback?: any, callback?: GuardCallback): RequestHandler {
+        return new Guard(serviceAccount, optionsOrCallback, callback).middleware;
     }
 
     signInWithEmail(email: string, password: string, callback: Callback) {
@@ -59,15 +70,33 @@ export default class FirebaseAuth {
         socialProviders.loginWithFacebook(this.apiKey, providerToken, callback);
     }
 
+    linkWithFacebook(idToken: string, providerToken: string, callback: Function) {
+        socialProviders.linkWithFacebook(this.apiKey, idToken, providerToken, callback);
+    }
+
     loginWithGoogle(providerToken: string, callback: Callback) {
         socialProviders.loginWithGoogle(this.apiKey, providerToken, callback);
+    }
+
+    linkWithGoogle(idToken: string, providerToken: string, callback: Function) {
+        socialProviders.linkWithGoogle(this.apiKey, idToken, providerToken, callback);
     }
 
     loginWithGithub(providerToken: string, callback: Callback) {
         socialProviders.loginWithGithub(this.apiKey, providerToken, callback);
     }
 
+    linkWithGithub(idToken: string, providerToken: string, callback: Function) {
+        socialProviders.linkWithGithub(this.apiKey, idToken, providerToken, callback);
+    }
+
     loginWithTwitter(providerToken: string, callback: Callback) {
         socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
     }
+
+    linkWithTwitter(idToken: string, providerToken: string, callback: Function) {
+        socialProviders.linkWithTwitter(this.apiKey, idToken, providerToken, callback);
+    }
 }
+
+export = FirebaseAuth;

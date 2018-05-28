@@ -11,7 +11,7 @@ export function getProfile(apiKey: string, token: string, callback: Function) {
 
 	const payload = { idToken: token };
 
-    Endpoints.post(new Endpoints(apiKey).urls.accountInfoUrl, payload)
+    Endpoints.post(Endpoints.urls(apiKey).accountInfoUrl, payload)
 		.then((result: any) => {
 			const users = result.users.map((firebaseUserResult: any) => new UserProfile(firebaseUserResult));
 			callback(null, users);
@@ -62,7 +62,7 @@ export function updateProfile(apiKey: string, token: string, name: string, ...mo
 	if (photoUrl)
 		payload.photoUrl = photoUrl;
 
-	Endpoints.post(new Endpoints(apiKey).urls.updateAccountInfoUrl, payload)
+	Endpoints.post(Endpoints.urls(apiKey).updateAccountInfoUrl, payload)
 		.then((updatedUserInfo: any) => callback(null, new UserProfile(updatedUserInfo)))
 		.catch((err: any) => utils.processFirebaseError(err));
 }
@@ -78,7 +78,7 @@ export function refreshToken(apiKey: string, refreshToken: string, callback: Fun
 		grant_type: "refresh_token"
 	};
 
-	const refreshTokenEndpoint = new Endpoints(apiKey).urls.refreshTokenUrl;
+	const refreshTokenEndpoint = Endpoints.urls(apiKey).refreshTokenUrl;
 	Endpoints.post(refreshTokenEndpoint, payload)
 		.then((userInfo: any) => callback(null, utils.processBasicFirebaseAuthResult(userInfo)))
 		.catch((err: any) => callback(utils.processFirebaseError(err)));

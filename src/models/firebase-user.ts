@@ -1,26 +1,28 @@
-export class User {
+export class FirebaseUser {
 	email: string;
 	displayName: string;
 	id: string;
 	newUser: boolean;
     authenticatedWith: string;
+    emailVerified: boolean;
+    photoUrl: string;
+    socialProfileUrl: string;
+    sameCredentialExists: boolean;
+    rawUserInfo: any;
+    accountDisabled: boolean;
+    profileUrls: any[];
 
     constructor(firebaseAuthResult: any) {
         this.email = firebaseAuthResult.email;
         this.displayName = firebaseAuthResult.displayName || "";
+        this.photoUrl = firebaseAuthResult.photoUrl || "";
         this.id = firebaseAuthResult.localId || firebaseAuthResult.user_id || firebaseAuthResult.uid;
         this.newUser = (firebaseAuthResult.registered === false);
         this.authenticatedWith = "password";
     }
 }
 
-export class SocialUser extends User {
-    emailVerified: boolean;
-    photoUrl: string;
-    socialProfileUrl: string;
-    sameCredentialExists: boolean;
-    rawUserInfo: any;
-
+export class SocialUser extends FirebaseUser {
     constructor(firebaseAuthResult: any) {
         super(firebaseAuthResult);
         this.emailVerified = firebaseAuthResult.emailVerified;
@@ -32,12 +34,7 @@ export class SocialUser extends User {
     }
 }
 
-export class UserProfile extends User {
-    photoUrl: string;
-    emailVerified: boolean;
-    accountDisabled: boolean;
-    profileUrls: any[];
-
+export class UserProfile extends FirebaseUser {
     constructor(firebaseUserInfo: any) {
         super(firebaseUserInfo);
         this.emailVerified = firebaseUserInfo.emailVerified;

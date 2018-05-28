@@ -20,11 +20,43 @@ Go to Overview -> Settings icon -> Project settings (General tab) to get your We
 It is best practice to store api keys, secrets and passwords as environment variables
 ***/
 
-const FirebaseAuth = require('firebaseauth');
-var firebase = new FirebaseAuth(process.env.FIREBASE_API_KEY); 
+const FirebaseAuth = require('firebaseauth'); // or import FirebaseAuth from 'firebaseauth';
+const firebase = new FirebaseAuth(process.env.FIREBASE_API_KEY);
 ```
 
 # Usage
+
+## Register with Email and Password (Name, Photo URL and requireVerification optional)
+```
+//just email and password signup
+firebase.registerWithEmail(email, password, function(err, result){
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+
+// signup with email, password and name
+firebase.registerWithEmail(email, password, name, function(err, result){
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+
+// signup with email, password and other info
+var extras = {
+	name: string,
+	photoUrl: string (must be a valid url),
+	requestVerification: boolean (true or false)
+}
+firebase.registerWithEmail(email, password, extras, function(err, result){
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+```
 
 ## Sign in with Email and Password
 ```
@@ -97,38 +129,6 @@ Follow the instructions at https://firebase.google.com/docs/auth/web/github-auth
 ***/
 
 firebase.loginWithGithub(token, function(err, result){
-	if (err)
-		console.log(err);
-	else
-		console.log(result);
-});
-```
-
-## Register with Email and Password (Name, Photo URL and requireVerification optional)
-```
-//just email and password signup
-firebase.registerWithEmail(email, password, function(err, result){
-	if (err)
-		console.log(err);
-	else
-		console.log(result);
-});
-
-//signup with email, password and name
-firebase.registerWithEmail(email, password, name, function(err, result){
-	if (err)
-		console.log(err);
-	else
-		console.log(result);
-});
-
-//signup with email, password and other info
-var extras = {
-	name: string,
-	photoUrl: string (must be a valid url),
-	requestVerification: boolean (true or false)
-}
-firebase.registerWithEmail(email, password, extras, function(err, result){
 	if (err)
 		console.log(err);
 	else
@@ -225,72 +225,88 @@ firebase.refreshToken(refreshToken, function(err, result){
 });
 ```
 
-## Set up resource protector middleware to control access to resouces/endpoints
+## Restrict access to resources/endpoints to only firebase-authorized users
+
+### Step 1 - Get service account json from your firebase project console
+
+From your console, go to Project Overview -> Settings icon -> Project settings (Service Accounts tab)
+
 ```
-/***
-Get service account json from your firebase project console 
-From your console, go to Overview -> Settings icon -> Project settings (Service Accounts tab)
-**/
-
-//create JSON object from your service account json file
-const serviceAccount = require("path/to/serviceAccountKey.json");
-
-/***
-Initialize default resource protector
-Default behaviour -> 
-	all errors return 401 status with body {error: "error description"}
-	if token is properly decoded, user info will be saved in req.user
-***/
-const protector = firebase.protect(serviceAccount);
-
-/***
-You can initialize resource protector with a callback
-When using callback, remmeber to call next() or respond with an error after processing the information returned to the callback
-***/
-
-const protector = firebase.protect(serviceAccount, function(req, res, next, error, data){
-	if (error === 'ERROR_NO_TOKEN'){
-		//token not supplied
-		//handle error case
-		res.status(401).json({error: "No token provided"});
-	}
-	else if (error === 'ERROR_INVALID_TOKEN'){
-		//token failed verification
-		//handle error case
-		res.status(401).json({error: "Unauthorized access"});
-	}
-	else if (error){
-		//some other error (this should never happen!) occurred
-		//handle as appropriate
-		res.status(500).json({error: "Unexpected error"});
-	}
-	else if (data.error){
-		//there was no error with verifying the token, thus user id can be found in data.userId
-		//there was however an error in getting user info from firebase using the id
-		res.status(401).json({error: "An error occured while trying to verfiy your credentials"});
-	}
-	else {
-		//data contains user profile information (email, id etc)
-
-		req.user = data;
-		next();
-	}
-});
+// create JSON object from your service account json file
+const serviceAccount = require("../path/to/serviceAccountKey.json");
 ```
 
-## Protect endpoints with Firebase Access Token and Express
+### Step 2 - Initialize token checking middleware for express
+Setup default token middleware with following behaviour
+- Checks for "token" in request header, body and query in that order (`req.headers.token || req.body.token || req.query.token`)
+- If token is not found or is invalid, 401 response is sent with relevant error message
+- If token is properly decoded, user id and original token sent by user is returned in `req.user` (v0.2.0 and later)
+- If token is properly decoded, full user info (token, id, displayName, email etc) is returned in `req.user` (v0.1.1 and earlier)
+
+```
+const firebaseTokenMiddleware = FirebaseAuth.defaultTokenMiddleware(serviceAccount); // v0.2.0 and later
+const firebaseTokenMiddleware = firebase.protect(serviceAccount); // v0.1.1 and earlier
+```
+
+### Register a callback
+You can register a callback to perform other operations after token verification or customize responses on token verification error.
+
+When using a callback, remember to call `next()` or respond with an error after processing the information returned to the callback
+```
+const middlewareCallback = function(req, res, next, error, data) {
+    if (error === 'ERROR_NO_TOKEN') {
+        // token not supplied
+        res.status(401).json({error: "No token provided"});
+    }
+    else if (error === 'ERROR_INVALID_TOKEN') {
+        // token failed verification
+        res.status(401).json({error: "Unauthorized access"});
+    }
+    else if (error) {
+        // some other error occurred (this should never happen!)
+        res.status(500).json({error: "Unexpected error"});
+    }
+    else if (data.error) {
+        // there was no error with verifying the token, thus user id can be found in data.userId
+        // there was however an error in getting user info from firebase using the id
+        res.status(401).json({error: "An error occurred while trying to verify your credentials"});
+    }
+    else {
+        // data contains user id and token (v0.2.0 and later) and full user information (id, displayName, email etc) for v0.1.1 and earlier
+        req.user = data;
+        next();
+    }
+};
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, middlewareCallback); // v0.2.0 and later
+const firebaseTokenMiddleware = firebase.protect(serviceAccount, middlewareCallback); // v0.1.1 and earlier
+```
+
+### Specify options (v0.2.0 and later only)
+You can specify which field to check in req header, body or query for user token instead of the default `token` field.
+
+You can also indicate if to include additional information about the user when verifying the token.
+
+```
+const options = {
+    tokenField: "access_token",
+    userIdOnly: false
+};
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options);
+
+// use with callback
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options, middlewareCallback); 
+```
+
+### Step 3 - Protect endpoints with Firebase Access Token and Express
 ```
 var express = require('express');
 var app = express();
 
 // to protect all routes below this point
-app.use(protector);
+app.use(firebaseTokenMiddleware);
 
 // to protect specific endpoints
-app.use('/protected-path', protector, function(req, res){
-	//req.auth.userId contains firebase user id
-	//req.auth.user contains user profile information
-
+app.use('/protected-path', firebaseTokenMiddleware, function(req, res) {
 	res.send('hello there. your user id is ' + req.user.id);
 })
 ```

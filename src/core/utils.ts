@@ -1,7 +1,7 @@
 import FirebaseError from "../models/firebase-error";
 import constants from "./constants";
 const rp = require("request-promise");
-import { SocialUser, User } from "../models/firebase-user";
+import { SocialUser, FirebaseUser } from "../models/firebase-user";
 
 export function callEndpoint(method: string, url: string, data?: any, callback?: any){
 	const options: any = {
@@ -31,14 +31,14 @@ export function processFirebaseAuthResult(firebaseAuthResult: any) {
 	if (firebaseAuthResult.providerId && firebaseAuthResult.providerId.toLowerCase() !== 'password')
 		authResult.user = new SocialUser(firebaseAuthResult);
 	else
-		authResult.user = new User(firebaseAuthResult);
+		authResult.user = new FirebaseUser(firebaseAuthResult);
 
 	return authResult;
 }
 
 export function processBasicFirebaseAuthResult(firebaseAuthResult: any) {
 	const expiresIn = firebaseAuthResult.expiresIn || firebaseAuthResult.expires_in;
-    const expiry = (parseInt(expiresIn) - 60) * 1000; //minus 60 seconds for network lag
+    const expiry = (parseInt(expiresIn) - 60) * 1000; // minus 60 seconds for network lag
 
     return {
         token: firebaseAuthResult.idToken || firebaseAuthResult.id_token,
@@ -85,6 +85,7 @@ export function processFirebaseError(error: any) {
 		        errorCode = "INVALID_REQUEST_BODY";
 		        errorMessage = "Missing or invalid postBody";
 		        break;
+			case "INVALID_ID_TOKEN":
 		    case "invalid access_token, error code 43.":
 		        errorCode = "INVALID_ACCESS_TOKEN";
 		        errorMessage = "Invalid access token";
