@@ -22,80 +22,80 @@ class FirebaseAuth {
         return new Guard(serviceAccount, optionsOrCallback, callback).middleware;
     }
 
-    signInWithEmail(email: string, password: string, callback: Callback) {
-        emailPasswordProvider.signIn(this.apiKey, email, password, callback);
+    signInWithEmail(email: string, password: string, callback?: Callback) {
+        return emailPasswordProvider.signIn(this.apiKey, email, password, callback);
     }
 
-    sendVerificationEmail(token: string, callback: Callback) {
-        emailPasswordProvider.sendVerificationEmail(this.apiKey, token, callback);
+    sendVerificationEmail(token: string, callback?: Callback) {
+        return emailPasswordProvider.sendVerificationEmail(this.apiKey, token, callback);
     }
 
-    verifyEmail(oobcode: string, callback: Callback) {
-        emailPasswordProvider.verifyEmail(this.apiKey, oobcode, callback);
+    verifyEmail(oobcode: string, callback?: Callback) {
+        return emailPasswordProvider.verifyEmail(this.apiKey, oobcode, callback);
     }
 
-    sendPasswordResetEmail(email: string, callback: Callback) {
-        emailPasswordProvider.sendPasswordResetEmail(this.apiKey, email, callback);
+    sendPasswordResetEmail(email: string, callback?: Callback) {
+        return emailPasswordProvider.sendPasswordResetEmail(this.apiKey, email, callback);
     }
 
-    verifyPasswordResetcode(oobcode: string, callback: Callback) {
-        emailPasswordProvider.verifyPasswordResetCode(this.apiKey, oobcode, callback);
+    verifyPasswordResetcode(oobcode: string, callback?: Callback) {
+        return emailPasswordProvider.verifyPasswordResetCode(this.apiKey, oobcode, callback);
     }
 
-    resetPassword(oobcode: string, newPassword: string, callback: Callback) {
-        emailPasswordProvider.resetPassword(this.apiKey, oobcode, newPassword, callback);
+    resetPassword(oobcode: string, newPassword: string, callback?: Callback) {
+        return emailPasswordProvider.resetPassword(this.apiKey, oobcode, newPassword, callback);
     }
 
-    changePassword(token: string, password: string, callback: Callback) {
-        emailPasswordProvider.changePassword(this.apiKey, token, password, callback);
+    changePassword(token: string, password: string, callback?: Callback) {
+        return emailPasswordProvider.changePassword(this.apiKey, token, password, callback);
     }
 
-    getProfile(token: string, callback: Callback) {
-        account.getProfile(this.apiKey, token, callback);
+    getProfile(token: string, callback?: Callback) {
+        return account.getProfile(this.apiKey, token, callback);
     }
 
-    updateProfile(token: string, name: string, photoUrl: string, callback: Callback) {
-        account.updateProfile(this.apiKey, token, name, photoUrl, callback);
+    updateProfile(token: string, name: string, photoUrl: string, callback?: Callback) {
+        return account.updateProfile(this.apiKey, token, name, photoUrl, callback);
     }
 
-    refreshToken(refreshToken: string, callback: Callback) {
-        account.refreshToken(this.apiKey, refreshToken, callback);
+    refreshToken(refreshToken: string, callback?: Callback) {
+        return account.refreshToken(this.apiKey, refreshToken, callback);
     }
 
-    registerWithEmail(email: string, password: string, extras: any, callback: Callback) {
-        emailPasswordProvider.register(this.apiKey, email, password, extras, callback);
+    registerWithEmail(email: string, password: string, extras: any, callback?: Callback) {
+        return emailPasswordProvider.register(this.apiKey, email, password, extras, callback);
     }
 
-    loginWithFacebook(providerToken: string, callback: Callback) {
-        socialProviders.loginWithFacebook(this.apiKey, providerToken, callback);
+    loginWithFacebook(providerToken: string, callback?: Callback) {
+        return socialProviders.loginWithFacebook(this.apiKey, providerToken, callback);
     }
 
-    linkWithFacebook(idToken: string, providerToken: string, callback: Function) {
-        socialProviders.linkWithFacebook(this.apiKey, idToken, providerToken, callback);
+    linkWithFacebook(idToken: string, providerToken: string, callback?: Function) {
+        return socialProviders.linkWithFacebook(this.apiKey, idToken, providerToken, callback);
     }
 
-    loginWithGoogle(providerToken: string, callback: Callback) {
-        socialProviders.loginWithGoogle(this.apiKey, providerToken, callback);
+    loginWithGoogle(providerToken: string, callback?: Callback) {
+        return socialProviders.loginWithGoogle(this.apiKey, providerToken, callback);
     }
 
-    linkWithGoogle(idToken: string, providerToken: string, callback: Function) {
-        socialProviders.linkWithGoogle(this.apiKey, idToken, providerToken, callback);
+    linkWithGoogle(idToken: string, providerToken: string, callback?: Function) {
+        return socialProviders.linkWithGoogle(this.apiKey, idToken, providerToken, callback);
     }
 
-    loginWithGithub(providerToken: string, callback: Callback) {
-        socialProviders.loginWithGithub(this.apiKey, providerToken, callback);
+    loginWithGithub(providerToken: string, callback?: Callback) {
+        return socialProviders.loginWithGithub(this.apiKey, providerToken, callback);
     }
 
-    linkWithGithub(idToken: string, providerToken: string, callback: Function) {
-        socialProviders.linkWithGithub(this.apiKey, idToken, providerToken, callback);
+    linkWithGithub(idToken: string, providerToken: string, callback?: Function) {
+        return socialProviders.linkWithGithub(this.apiKey, idToken, providerToken, callback);
     }
 
-    loginWithTwitter(providerToken: string, callback: Callback) {
-        socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
+    loginWithTwitter(providerToken: string, callback?: Callback) {
+        return socialProviders.loginWithTwitter(this.apiKey, providerToken, callback);
     }
 
-    linkWithTwitter(idToken: string, providerToken: string, callback: Function) {
-        socialProviders.linkWithTwitter(this.apiKey, idToken, providerToken, callback);
+    linkWithTwitter(idToken: string, providerToken: string, callback?: Function) {
+        return socialProviders.linkWithTwitter(this.apiKey, idToken, providerToken, callback);
     }
 }
 
