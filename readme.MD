@@ -9,46 +9,46 @@ Firebase authentication library - a node js wrapper around the Firebase REST API
 ```
 $ npm install firebaseauth
 ```
-
 ## Setup
-```
-/***
-To use firebase authentication, you need to sign into or register at https://console.firebase.google.com
-From the firebase console, create a project or select an existing one
+To use firebase authentication, you need to sign into or create an account at [https://console.firebase.google.com].
+From the firebase console, create a project or select an existing one.
+
 Go to Overview -> Settings icon -> Project settings (General tab) to get your Web API Key
 
-It is best practice to store api keys, secrets and passwords as environment variables
-***/
-
+It is best practice to store api keys, secrets and passwords as environment variables.
+```javascript
 const FirebaseAuth = require('firebaseauth'); // or import FirebaseAuth from 'firebaseauth';
 const firebase = new FirebaseAuth(process.env.FIREBASE_API_KEY);
 ```
 
 # Usage
 
-## Register with Email and Password (Name, Photo URL and requireVerification optional)
-```
-//just email and password signup
-firebase.registerWithEmail(email, password, function(err, result){
+## Authentication with Email and Password
+Ensure you have enabled email-password authentication from your [firebase console](https://console.firebase.google.com, "Firebase Console"). From the console, go to Authentication (Sign in method tab) and enable Email/Password
+#### Simple registration with email and password only
+```javascript
+firebase.registerWithEmail(email, password, function(err, result) {
 	if (err)
 		console.log(err);
 	else
 		console.log(result);
 });
-
-// signup with email, password and name
+```
+#### Register with email, password and name
+```javascript
 firebase.registerWithEmail(email, password, name, function(err, result){
 	if (err)
 		console.log(err);
 	else
 		console.log(result);
 });
-
-// signup with email, password and other info
+```
+#### Register with email, password and other info
+```javascript
 var extras = {
 	name: string,
-	photoUrl: string (must be a valid url),
-	requestVerification: boolean (true or false)
+	photoUrl: string | url,
+	requestVerification: boolean
 }
 firebase.registerWithEmail(email, password, extras, function(err, result){
 	if (err)
@@ -57,14 +57,8 @@ firebase.registerWithEmail(email, password, extras, function(err, result){
 		console.log(result);
 });
 ```
-
-## Sign in with Email and Password
-```
-/***
-Ensure you have enabled email-password authentication from your firebase console
-From the console, go to Authentication (Sign in method tab) and enable Email/Password
-***/
-
+#### Sign in with Email and Password
+```javascript
 firebase.signInWithEmail(email, password, function(err, result){
 	if (err)
 		console.log(err);
@@ -73,15 +67,27 @@ firebase.signInWithEmail(email, password, function(err, result){
 });
 ```
 
-## Sign in with token from Facebook
-```
-/***
-Ensure you have enabled Facebook authentication from your firebase console
-From the console, go to Authentication (Sign in method tab) and enable Facebook
-Follow the instructions at https://firebase.google.com/docs/auth/web/facebook-login (Steps 2 and 3 specifically of the Before you begin section) to properly set up and configure Facebook authentication on your firebase project
-***/
+## Authentication with Facebook Account
+Ensure you have enabled Facebook authentication from your [firebase console](https://console.firebase.google.com, "Firebase Console"). From the console, go to Authentication (Sign in method tab) and enable Facebook.
 
-firebase.loginWithFacebook(token, function(err, result){
+Follow the instructions at [https://firebase.google.com/docs/auth/web/facebook-login](https://firebase.google.com/docs/auth/web/facebook-login) (Steps 2 and 3 _specifically_ of the Before you begin section) to properly set up and configure Facebook authentication on your firebase project
+#### Sign in with Facebook access token
+```javascript
+firebase.loginWithFacebook(token, function(err, result) {
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+```
+#### Link email account to Facebook account
+Login with Facebook may fail to return a valid firebase token if the email associated with the Facebook account has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
+
+If the email was previously associated with an email/password account, then you can link both accounts a follows:
+
+First, login with the email and password to get the firebase idToken (token), then get Facebook access token like in the step above and then... 
+```javascript
+firebase.linkWithFacebook(idToken, access_token, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -89,14 +95,23 @@ firebase.loginWithFacebook(token, function(err, result){
 });
 ```
 
-## Sign in with token from Google
+## Authentication with Google (Gmail) account
+Ensure you have enabled authentication with Google from your [firebase console](https://console.firebase.google.com, "Firebase Console"). From the console, go to Authentication (Sign in method tab) and enable Google.
+#### Sign in with Google account
+```javascript
+firebase.loginWithGoogle(token, function(err, result) {
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
 ```
-/***
-Ensure you have enabled authentication with Google from your firebase console
-From the console, go to Authentication (Sign in method tab) and enable Google
-***/
+#### Link email account to Google account
+Login with Google may fail to return a valid firebase token if the gmail address has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
 
-firebase.loginWithGoogle(token, function(err, result){
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account). 
+```javascript
+firebase.linkWithGoogle(idToken, access_token, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -104,15 +119,25 @@ firebase.loginWithGoogle(token, function(err, result){
 });
 ```
 
-## Sign in with token from Twitter
-```
-/***
-Ensure you have enabled Twitter authentication from your firebase console
-From the console, go to Authentication (Sign in method tab) and enable Twitter
-Follow the instructions at https://firebase.google.com/docs/auth/web/twitter-login (Steps 2 and 3 specifically of the Before you begin section) to properly set up and configure Twitter authentication on your firebase project
-***/
+## Authentication with Twitter Account
+Ensure you have enabled Twitter authentication from your [firebase console](https://console.firebase.google.com, "Firebase Console"). From the console, go to Authentication (Sign in method tab) and enable Twitter.
 
-firebase.loginWithTwitter(token, function(err, result){
+Follow the instructions at [https://firebase.google.com/docs/auth/web/twitter-login](https://firebase.google.com/docs/auth/web/twitter-login) (Steps 2 and 3 specifically of the Before you begin section) to properly set up and configure Twitter authentication on your firebase project
+#### Sign in with Twitter Account
+```javascript
+firebase.loginWithTwitter(token, function(err, result) {
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+```
+#### Link email account to Twitter account
+Login with Twitter may fail to return a valid firebase token if the email address associated with the twitter account has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
+
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account).
+```javascript
+firebase.linkWithTwitter(idToken, access_token, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -120,15 +145,25 @@ firebase.loginWithTwitter(token, function(err, result){
 });
 ```
 
-## Sign in with token from Github
-```
-/***
-Ensure you have enabled Github authentication from your firebase console
-From the console, go to Authentication (Sign in method tab) and enable Github
-Follow the instructions at https://firebase.google.com/docs/auth/web/github-auth (Steps 2 and 3 specifically of the Before you begin section) to properly set up and configure Github authentication on your firebase project
-***/
+## Authentication with Github
+Ensure you have enabled Github authentication from your [firebase console](https://console.firebase.google.com, "Firebase Console"). From the console, go to Authentication (Sign in method tab) and enable Github.
 
-firebase.loginWithGithub(token, function(err, result){
+Follow the instructions at [https://firebase.google.com/docs/auth/web/github-auth](https://firebase.google.com/docs/auth/web/github-auth) (Steps 2 and 3 specifically of the Before you begin section) to properly set up and configure Github authentication on your firebase project
+#### Sign in with Github Account
+```
+firebase.loginWithGithub(token, function(err, result) {
+	if (err)
+		console.log(err);
+	else
+		console.log(result);
+});
+```
+#### Link email account to Github account
+Login with Github may fail to return a valid firebase token if the email address associated with the Github account has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
+
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account).
+```javascript
+firebase.linkWithGithub(idToken, access_token, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -138,7 +173,7 @@ firebase.loginWithGithub(token, function(err, result){
 
 ## Send Verification Email to user
 ```
-firebase.sendVerificationEmail(token, function(err, result){
+firebase.sendVerificationEmail(token, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -148,7 +183,7 @@ firebase.sendVerificationEmail(token, function(err, result){
 
 ## Verify user with oobCode gotten from verification email
 ```
-firebase.verifyEmail(oobcode, function(err, result){
+firebase.verifyEmail(oobcode, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -158,7 +193,7 @@ firebase.verifyEmail(oobcode, function(err, result){
 
 ## Get user information
 ```
-firebase.getProfile(token, function(err, result){
+firebase.getProfile(token, function(err, result) {
 	if (err)
 		console.log(err);
 	else{
@@ -170,14 +205,14 @@ firebase.getProfile(token, function(err, result){
 
 ## Update user information
 ```
-firebase.updateProfile(token, name, function(err, result){
+firebase.updateProfile(token, name, function(err, result) {
 	if (err)
 		console.log(err);
 	else
 		console.log(result);
 });
 
-firebase.updateProfile(token, name, photoUrl, function(err, result){
+firebase.updateProfile(token, name, photoUrl, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -187,7 +222,7 @@ firebase.updateProfile(token, name, photoUrl, function(err, result){
 
 ## Send password reset email
 ```
-firebase.sendPasswordResetEmail(email, function(err, result){
+firebase.sendPasswordResetEmail(email, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -197,7 +232,7 @@ firebase.sendPasswordResetEmail(email, function(err, result){
 
 ## Verify password reset oobCode
 ```
-firebase.verifyPasswordResetcode(oobCode, function(err, result){
+firebase.verifyPasswordResetcode(oobCode, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -207,7 +242,7 @@ firebase.verifyPasswordResetcode(oobCode, function(err, result){
 
 ## Reset password using oobCode gotten from password reset email
 ```
-firebase.resetPassword(oobcode, newPassword, function(err, result){
+firebase.resetPassword(oobcode, newPassword, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -217,7 +252,7 @@ firebase.resetPassword(oobcode, newPassword, function(err, result){
 
 ## Refresh Firebase Access Token
 ```
-firebase.refreshToken(refreshToken, function(err, result){
+firebase.refreshToken(refreshToken, function(err, result) {
 	if (err)
 		console.log(err);
 	else
@@ -244,8 +279,8 @@ Setup default token middleware with following behaviour
 - If token is properly decoded, full user info (token, id, displayName, email etc) is returned in `req.user` (v0.1.1 and earlier)
 
 ```
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount); // v0.9.9 and later
-const firebaseTokenMiddleware = FirebaseAuth.defaultTokenMiddleware(serviceAccount); // v0.2.0 to 0.9.8
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount); // v1.0.0 and later
+const firebaseTokenMiddleware = FirebaseAuth.defaultTokenMiddleware(serviceAccount); // v0.2.0 to 0.9.9
 const firebaseTokenMiddleware = firebase.protect(serviceAccount); // v0.1.1 and earlier
 ```
 
@@ -278,8 +313,8 @@ const middlewareCallback = function(req, res, next, error, data) {
         next();
     }
 };
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, middlewareCallback); // v0.9.9 and later
-const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, middlewareCallback); // v0.2.0 to 0.9.8
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, middlewareCallback); // v1.0.0 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, middlewareCallback); // v0.2.0 to 0.9.9
 const firebaseTokenMiddleware = firebase.protect(serviceAccount, middlewareCallback); // v0.1.1 and earlier
 ```
 
@@ -293,12 +328,12 @@ const options = {
     tokenField: "access_token",
     userIdOnly: false
 };
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options); // v0.9.9 and later
-const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options); // v0.2.0 to 0.9.8
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options); // v1.0.0 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options); // v0.2.0 to 0.9.9
 
 // use with callback
-const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options, middlewareCallback); // v0.9.9 and later
-const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options, middlewareCallback); // v0.2.0 to 0.9.8
+const firebaseTokenMiddleware = FirebaseAuth.initTokenMiddleware(serviceAccount, options, middlewareCallback); // v1.0.0 and later
+const firebaseTokenMiddleware = new FirebaseAuth.Guard(serviceAccount, options, middlewareCallback); // v0.2.0 to 0.9.9
 ```
 
 ### Step 3 - Protect endpoints with Firebase Access Token and Express
