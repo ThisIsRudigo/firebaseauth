@@ -109,7 +109,7 @@ firebase.loginWithGoogle(token, function(err, result) {
 #### Link email account to Google account
 Login with Google may fail to return a valid firebase token if the gmail address has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
 
-If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account). 
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#link-email-account-to-facebook-account). 
 ```javascript
 firebase.linkWithGoogle(idToken, access_token, function(err, result) {
 	if (err)
@@ -135,7 +135,7 @@ firebase.loginWithTwitter(token, function(err, result) {
 #### Link email account to Twitter account
 Login with Twitter may fail to return a valid firebase token if the email address associated with the twitter account has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
 
-If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account).
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#link-email-account-to-facebook-account).
 ```javascript
 firebase.linkWithTwitter(idToken, access_token, function(err, result) {
 	if (err)
@@ -161,7 +161,7 @@ firebase.loginWithGithub(token, function(err, result) {
 #### Link email account to Github account
 Login with Github may fail to return a valid firebase token if the email address associated with the Github account has already been used on this firebase project. In such instances, the result returned from the above call will have `sameCredentialExists = true`.
 
-If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#Link-email-account-to-Facebook-account).
+If the email was previously associated with an email/password account, then you can link both accounts in a similar fashion as explained under [Link email account to Facebook account](#link-email-account-to-facebook-account).
 ```javascript
 firebase.linkWithGithub(idToken, access_token, function(err, result) {
 	if (err)
