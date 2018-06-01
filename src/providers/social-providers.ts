@@ -29,7 +29,7 @@ function loginWithProviderID(apiKey: string, providerToken: string, providerId: 
         };
 
         Endpoints.post(Endpoints.urls(apiKey).socialIdentityUrl, payload)
-            .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
+            .then((userInfo: any) => callback(undefined, utils.processFirebaseAuthResult(userInfo)))
             .catch((err: any) => callback(utils.processFirebaseError(err)));
     });
 }
@@ -49,7 +49,7 @@ function linkWithProviderID(apiKey: string, idToken: string, providerToken: stri
     };
 
     Endpoints.post(Endpoints.urls(apiKey).socialIdentityUrl, payload)
-        .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
+        .then((userInfo: any) => callback(undefined, utils.processFirebaseAuthResult(userInfo)))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
 

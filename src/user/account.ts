@@ -21,7 +21,7 @@ export function getProfile(apiKey: string, token: string, callback?: Function) {
       Endpoints.post(Endpoints.urls(apiKey).accountInfoUrl, payload)
       .then((result: any) => {
         const users = result.users.map((firebaseUserResult: any) => new UserProfile(firebaseUserResult));
-        callback(null, users);
+        callback(undefined, users);
       })
       .catch((err: any) => {
         callback(utils.processFirebaseError(err));
@@ -75,7 +75,7 @@ export function updateProfile(apiKey: string, token: string, name: string, ...mo
       payload.photoUrl = photoUrl;
 
     Endpoints.post(Endpoints.urls(apiKey).updateAccountInfoUrl, payload)
-      .then((updatedUserInfo: any) => callback(null, new UserProfile(updatedUserInfo)))
+      .then((updatedUserInfo: any) => callback(undefined, new UserProfile(updatedUserInfo)))
       .catch((err: any) => utils.processFirebaseError(err));
   });
 }
@@ -100,7 +100,7 @@ export function refreshToken(apiKey: string, refreshToken: string, callback?: Fu
 
     const refreshTokenEndpoint = Endpoints.urls(apiKey).refreshTokenUrl;
     Endpoints.post(refreshTokenEndpoint, payload)
-      .then((userInfo: any) => callback(null, utils.processBasicFirebaseAuthResult(userInfo)))
+      .then((userInfo: any) => callback(undefined, utils.processBasicFirebaseAuthResult(userInfo)))
       .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
