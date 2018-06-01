@@ -11,18 +11,15 @@ export interface FirebaseResponse {
   expiryMilliseconds: number;
 }
 
-export function register(apiKey: string, email: string, password: string, ...more: any[]): Promise<FirebaseResponse> | void {
-  return new Promise(function (resolve, reject) {
-    let extras: any, callback: Function;
+export interface Extras {
+  name: string;
+  photoUrl: string;
+  requestVerification: boolean;
+}
 
-      // search for callback function first
-    if (more.length === 1) {
-      callback = more[0];
-    }
-    else if (more.length === 2) {
-        extras = more[0];
-        callback = more[1];
-      }
+export function register(apiKey: string, email: string, password: string, extras: string|Extras, callback?: Function): Promise<FirebaseResponse>;
+export function register(apiKey: string, email: string, password: string, extras: string|Extras, callback: Function): Promise<FirebaseResponse> | void {
+  return new Promise(function (resolve, reject) {
 
     if (typeof(callback) !== "function") {
       callback = (err: any, res: any) => {
@@ -44,19 +41,13 @@ export function register(apiKey: string, email: string, password: string, ...mor
     let name: string, photoUrl: string, requestVerification: boolean;
 
     if (extras) {
-      const typeOfExtras = typeof(extras);
-
-      if (typeOfExtras === "string") {
+      if (typeof(extras) === "string") {
         name = extras;
       }
-      else if (typeOfExtras === "object") {
+      else {
         name = extras.name;
         photoUrl = extras.photoUrl;
         requestVerification = extras.requestVerification;
-      }
-      else {
-        callback(utils.invalidArgumentError("Extras. Expected an object, found a " + typeOfExtras));
-        return;
       }
     }
 
@@ -111,11 +102,12 @@ function completeRegistration(apiKey: string, name: string, photoUrl: string, au
   }
   else {
     // no extra info to update
-    callback(null, authResult);
+    callback(undefined, authResult);
   }
 }
 
-export function signIn(apiKey: string, email: string, password: string, callback?: Function): Promise<FirebaseResponse> | void {
+export function signIn(apiKey: string, email: string, password: string, callback?: Function): Promise<FirebaseResponse>;
+export function signIn(apiKey: string, email: string, password: string, callback: Function): Promise<FirebaseResponse> | void {
   return new Promise((resolve, reject) => {
     if (typeof(callback) !== "function") {
       callback = (err: any, res: any) => {
@@ -141,7 +133,7 @@ export function signIn(apiKey: string, email: string, password: string, callback
     };
 
     Endpoints.post(Endpoints.urls(apiKey).signInUrl, payload)
-      .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
+      .then((userInfo: any) => callback(undefined, utils.processFirebaseAuthResult(userInfo)))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 
@@ -166,7 +158,7 @@ export function sendVerificationEmail(apiKey: string, token: string, callback?: 
     };
 
     Endpoints.post(Endpoints.urls(apiKey).sendVerificationEmailUrl, payload)
-      .then(() => callback(null, { status: "success" }))
+      .then(() => callback(undefined, { status: "success" }))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
@@ -182,7 +174,7 @@ export function verifyEmail(apiKey: string, oobCode: string, callback?: Function
     const payload = { oobCode: oobCode };
 
     Endpoints.post(Endpoints.urls(apiKey).verifyEmailUrl, payload)
-      .then((userInfo: any) => callback(null, new FirebaseUser(userInfo)))
+      .then((userInfo: any) => callback(undefined, new FirebaseUser(userInfo)))
           .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
@@ -206,7 +198,7 @@ export function sendPasswordResetEmail(apiKey: string, email: string, callback?:
     };
 
     Endpoints.post(Endpoints.urls(apiKey).sendPasswordResetEmailUrl, payload)
-          .then(() => callback(null, { status: "success" }))
+          .then(() => callback(undefined, { status: "success" }))
           .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
@@ -225,7 +217,7 @@ export function verifyPasswordResetCode(apiKey: string, oobCode: string, callbac
     }
 
     Endpoints.post(Endpoints.urls(apiKey).verifyPasswordResetcodeUrl, { oobCode: oobCode })
-          .then(() => callback(null, { verified: true }))
+          .then(() => callback(undefined, { verified: true }))
           .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
@@ -249,7 +241,7 @@ export function resetPassword(apiKey: string, oobCode: string, newPassword: stri
     };
 
     Endpoints.post(Endpoints.urls(apiKey).resetPasswordUrl, payload)
-          .then(() => callback(null, { status: "success" }))
+          .then(() => callback(undefined, { status: "success" }))
           .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 }
@@ -274,7 +266,7 @@ export function changePassword(apiKey: string, token: string, password: string, 
     }
 
     Endpoints.post(Endpoints.urls(apiKey).changePasswordUrl, payload)
-        .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
+        .then((userInfo: any) => callback(undefined, utils.processFirebaseAuthResult(userInfo)))
         .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 
