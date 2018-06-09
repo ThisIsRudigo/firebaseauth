@@ -1,3 +1,4 @@
+import * as admin from "firebase-admin";
 import * as utils from "../core/utils";
 import Endpoints from "../core/endpoints";
 import * as validator from "validator";
