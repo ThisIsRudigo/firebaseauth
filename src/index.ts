@@ -50,8 +50,12 @@ class FirebaseAuth {
         return emailPasswordProvider.changePassword(this.apiKey, token, password, callback);
     }
 
+    changeEmail(token: string, email: string, callback: Callback) {
+        emailPasswordProvider.changeEmail(this.apiKey, token, email, callback);
+    }
+
     getProfile(token: string, callback?: Callback) {
-        return account.getProfile(this.apiKey, token, callback);
+        account.getProfile(this.apiKey, token, callback);
     }
 
     updateProfile(token: string, name: string, photoUrl: string, callback?: Callback) {

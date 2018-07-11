@@ -1,3 +1,4 @@
+import * as admin from "firebase-admin";
 import * as utils from "../core/utils";
 import Endpoints from "../core/endpoints";
 import * as validator from "validator";
@@ -270,4 +271,19 @@ export function changePassword(apiKey: string, token: string, password: string, 
         .catch((err: any) => callback(utils.processFirebaseError(err)));
   });
 
+export function changeEmail(apiKey: string, token: string, email: string, callback?: Function) {
+    const payload = {
+        email: email,
+        idToken: token,
+        returnSecureToken: true
+    };
+
+    if (!validator.isEmail(email)) {
+		callback(utils.invalidArgumentError('Email'));
+		return;
+	}
+
+    Endpoints.post(Endpoints.urls(apiKey).changeEmailUrl, payload)
+        .then((userInfo: any) => callback(null, utils.processFirebaseAuthResult(userInfo)))
+        .catch((err: any) => callback(utils.processFirebaseError(err)));
 }
