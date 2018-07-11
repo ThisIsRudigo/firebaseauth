@@ -13,6 +13,7 @@ export default class EndPoints {
             verifyPasswordResetcodeUrl: `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=${apiKey}`,
             resetPasswordUrl: `https://www.googleapis.com/identitytoolkit/v3/relyingparty/resetPassword?key=${apiKey}`,
             changePasswordUrl: `https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key=${apiKey}`,
+            changeEmailUrl: `https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key=${apiKey}`,
             accountInfoUrl:`https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=${apiKey}`,
             refreshTokenUrl: `https://securetoken.googleapis.com/v1/token?key=${apiKey}`,
             updateAccountInfoUrl: `https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key=${apiKey}`,
