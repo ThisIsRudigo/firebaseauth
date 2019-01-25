@@ -51,7 +51,7 @@ export class Guard {
     }
 
     middleware = (req: Request, res: Response, next: NextFunction) => {
-        const token = req.headers[this.options.tokenField] || req.body[this.options.tokenField] || req.query[this.options.tokenField];
+        const token = req.headers[this.options.tokenField] || (req.body && req.body[this.options.tokenField]) || req.query[this.options.tokenField];
         if (!token) {
             this.callback ? this.callback(req, res, next, ERROR_NO_TOKEN) : res.status(401).json({error: "No token provided"});
             return;
